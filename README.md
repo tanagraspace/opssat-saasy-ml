@@ -1,7 +1,7 @@
 # OPS-SAT Datapool Stress Tester App
 An NMF App to stress test fetching and setting OBSW datapool parameters
 
-## Installation
+## Installing
 
 ### Requirements
 - Java 8
