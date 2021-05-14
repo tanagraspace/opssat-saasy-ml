@@ -43,7 +43,7 @@ public class SimAppThread extends Thread {
         
         this.logPrefix = "[App #" + this.id + "] ";
         
-        // Data handler for this simulated app instance.
+        // data handler for this simulated app instance
         double intervalsInSeconds = interval / 1000;
         this.dataGetHandler = new SimAppDataGetHandler(adapter, id, intervalsInSeconds, paramsToGet);
         
@@ -53,18 +53,18 @@ public class SimAppThread extends Thread {
     @Override
     public void run() {
         
-        // Error code to check for errors
+        // error code to check for errors
         UInteger errorCode = null;
         
         try {
             
-            // Log start of simulation app.
+            // log start of simulation app
             LOGGER.log(Level.INFO, this.logPrefix + "Starting App, Fetching: " + String.join(", ", this.paramsToGet));
             
-            // Subscribe to parameter data provisioning service
+            // subscribe to parameter data provisioning service
             errorCode = this.dataGetHandler.toggleSupervisorParametersSubscription(true);
             
-            // Check if no error
+            // check if no error
             if(errorCode != null) {
                 LOGGER.log(Level.SEVERE, this.logPrefix + "Error Code " + errorCode.getValue() + ": Failed to subscribe to parameters service.");
                 return;
@@ -74,18 +74,18 @@ public class SimAppThread extends Thread {
                 
                 LOGGER.log(Level.INFO,this.logPrefix + "Iteration: " + i + "/" + this.iterations);
 
-                // Check if we are stopping the app B\before waiting to make the next request
+                // check if we are stopping the app B\before waiting to make the next request
                 if(!ApplicationManager.getInstance().isSimKeepAlive()) {
                     break;
                 }
                 
-                // Wait for a bit.
+                // wait for a bit
                 Thread.sleep(this.interval);
                 Pair<Long, Map<String, String>> parametersValues = this.dataGetHandler.getParametersValues();
                 
                 Long timestamp = parametersValues.getLeft();
                 
-                // Build CSV row string of fetched values
+                // build CSV row string of fetched values
                 StringBuffer line = new StringBuffer();
                 line.append(String.format("%.3f", timestamp / 1000.0));
                 line.append(",");
@@ -118,10 +118,10 @@ public class SimAppThread extends Thread {
                 }
             }
             
-            // Unsubscribe to parameter data provisioning service
+            // unsubscribe to parameter data provisioning service
             errorCode = this.dataGetHandler.toggleSupervisorParametersSubscription(false);
             
-         // Check if no error
+            // check if no error
             if(errorCode != null) {
                 LOGGER.log(Level.SEVERE, this.logPrefix + "Error Code " + errorCode.getValue() + ": Failed to unsubscribe to parameters service.");
                 return;

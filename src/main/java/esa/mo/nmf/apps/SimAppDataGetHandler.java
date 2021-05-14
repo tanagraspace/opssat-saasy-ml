@@ -39,40 +39,40 @@ import esa.mo.nmf.commonmoadapter.CompleteAggregationReceivedListener;
 public class SimAppDataGetHandler {
     private static final Logger LOGGER = Logger.getLogger(SimAppDataGetHandler.class.getName());
     
-    // Parameters default value before first acquisition
+    // parameters default value before first acquisition
     public static final String PARAMS_DEFAULT_VALUE = "null";
     
-    // M&C interface of the application.
+    // M&C interface of the application
     private final StressTesterMCAdapter adapter;
 
-    // Lock for accessing our latest aggregation instance received from supervisor
+    // lock for accessing our latest aggregation instance received from supervisor
     private final ReentrantLock aggInstanceLock = new ReentrantLock();
 
-    // Latest aggregation instance received from supervisor
+    // latest aggregation instance received from supervisor
     private AggregationInstance aggInstance;
 
-    // he listener for parameters values coming from supervisor
+    // the listener for parameters values coming from supervisor
     private CompleteAggregationReceivedListener aggregationListener;
     
-    // Aggregation Id string
+    // aggregation Id string
     private String aggIdStr;
     
-    // Aggregation Id of the aggregation we create
+    // aggregation Id of the aggregation we create
     private Long aggId;
     
-    // Aggregation description
+    // aggregation description
     private String aggDescription;
 
-    // The Id of the simulated app
+    // the Id of the simulated app
     private int appId;
     
-    // Time interval between 2 sampling iterations in milliseconds for the simulated app
+    // time interval between 2 sampling iterations in milliseconds for the simulated app
     private double paramSamplingInterval;
     
-    // Supervisor (OBSW) parameters names
+    // supervisor (OBSW) parameters names
     private List<String> parametersNames;
     
-    // Prefix for log messages so that we know what simulated app instance triggered the log message
+    // prefix for log messages so that we know what simulated app instance triggered the log message
     private String loggerMessagePrefix;
     
     /**
@@ -130,7 +130,7 @@ public class SimAppDataGetHandler {
           return new UInteger(Constants.ERROR_LISTING_PARAMETERS_TO_FETCH);
       }
       
-      // List of param ids
+      // list of param ids
       LongList paramIds = new LongList();
       
       objInstPairList.stream()

@@ -1,19 +1,17 @@
 package esa.mo.nmf.apps;
 
-import java.util.concurrent.locks.ReentrantLock;
-
 public class ApplicationManager {
 
     private static volatile ApplicationManager instance;
     private static Object mutex = new Object();
     
-    // Flag indicating if the app simulation threads should be stopped
+    // flag indicating if the app simulation threads should be stopped
     private boolean simKeepAlive = true;
     
-    // Flag indicating we a data received listener has already been registered for the Aggregation service
+    // flag indicating we a data received listener has already been registered for the Aggregation service
     private boolean aggregationListenerRegistered = false;
 
-    // Hide the constructor
+    // hide the constructor
     private ApplicationManager() {}
 
     public static ApplicationManager getInstance() {
@@ -26,7 +24,7 @@ public class ApplicationManager {
          */
         ApplicationManager result = instance;
         
-        // Enforce Singleton design pattern.
+        // enforce Singleton design pattern
         if (result == null) {
             synchronized (mutex) {
                 result = instance;
@@ -35,7 +33,7 @@ public class ApplicationManager {
             }
         }
         
-        // Return singleton instance.
+        // return singleton instance
         return result;
     }
     

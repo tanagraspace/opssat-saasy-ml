@@ -28,22 +28,22 @@ public class SimAppHandler {
     public void startSimulation() throws Exception {
         LOGGER.log(Level.INFO, "Starting app simulations...");
         
-        // Get numbers of apps to simulate.
+        // get numbers of apps to simulate
         String appCountStr = PropertiesManager.getinstance().getProperty(PropertiesManager.PROPS_APP_COUNT);
         int appCount = Integer.parseInt(appCountStr);
         
-        // Instanciate app simulations as threads.
+        // instanciate app simulations as threads
         for(int appId = 1; appId <= appCount; appId++) {
             
-            // Fetch app simulation properties. 
+            // fetch app simulation properties
             int iterations = PropertiesManager.getinstance().getAppSimIterations(appId);
             int intervals = PropertiesManager.getinstance().getAppSimInterval(appId);
             int paramGetCount = PropertiesManager.getinstance().getAppSimParamsGetCount(appId);
                     
-            // Param names to be fetched by the app simulation.
+            // param names to be fetched by the app simulation
             List<String> paramsToGet = DatapoolXmlManager.getinstance().getParamNames(paramGetCount, DatapoolParamTypes.Float);
                     
-            // Start app simulation.
+            // start app simulation
             SimAppThread appThread = new SimAppThread(this.adapter, appId, iterations, intervals, paramsToGet);
             appThread.start();
         }

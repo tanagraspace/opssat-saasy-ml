@@ -1,8 +1,6 @@
 package esa.mo.nmf.apps;
 import java.util.logging.Logger;
 
-import org.ccsds.moims.mo.mal.provider.MALInteraction;
-
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
@@ -63,7 +61,7 @@ public class StressTesterMCAdapter extends MonitorAndControlNMFAdapter{
     public void setConnector(NanoSatMOConnectorImpl connector) {
          this.connector = connector;
         
-         // Define application behavior when closed
+         // define application behavior when closed
          this.connector.setCloseAppListener(new CloseAppListener() {
              @Override
              public Boolean onClose() {
@@ -81,19 +79,11 @@ public class StressTesterMCAdapter extends MonitorAndControlNMFAdapter{
     public boolean onClose(boolean requestFromUser) {
         boolean success = true;
         
-        // Stop fetching data in supervisor
-        /*
-        if (dataHandler.toggleSupervisorParametersSubscription(false) != null) {
-            success = false;
-        }*/
-        
-        
-        // Signal the simulation threads to exit their loops.
-        // FIXME: Simulation thread may still be sleeping before it gets the signal. Might have to use Thread.interrupt.
+        // signal the simulation threads to exit their loops
+        // FIXME: Simulation thread may still be sleeping before it gets the signal. Might have to use Thread.interrupt()
         simulationHandler.stopSimulation();
         
-        
-        // Close supervisor consumer connections
+        // close supervisor consumer connections
         supervisorSMA.closeConnections();
         
         LOGGER.log(Level.INFO, "Closed application successfully: " + success);
