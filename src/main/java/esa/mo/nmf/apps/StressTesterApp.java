@@ -6,29 +6,29 @@ import esa.mo.nmf.nanosatmoconnector.NanoSatMOConnectorImpl;
 import esa.mo.nmf.spacemoadapter.SpaceMOApdapterImpl;
 
 /**
- *Stress Tester App
+ * Datapool Stress Tester App
  * 
  * @author Georges Labreche
  */
 public final class StressTesterApp{
     private static final Logger LOGGER = Logger.getLogger(StressTesterApp.class.getName());
     
-    // App Monitor and Control (M&C) Adapter.
+    // app Monitor and Control (M&C) Adapter
     private StressTesterMCAdapter adapter;
     
     private StressTesterApp() {
-        // Initialize M&C interface.
+        // initialize M&C interface
         adapter = new StressTesterMCAdapter();
 
-        // Initialize application's NMF provider.
+        // initialize application's NMF provider
         NanoSatMOConnectorImpl connector = new NanoSatMOConnectorImpl();
         connector.init(adapter);
 
-        // Initialize application's NMF consumer (consuming the supervisor).
+        // initialize application's NMF consumer (consuming the supervisor)
         SpaceMOApdapterImpl supervisorSMA =
             SpaceMOApdapterImpl.forNMFSupervisor(connector.readCentralDirectoryServiceURI());
 
-        // Once all initialized, pass them to the M&C interface that handles the application's logic.
+        // once all initialized, pass them to the M&C interface that handles the application's logic
         adapter.setConnector(connector);
         adapter.setSupervisorSMA(supervisorSMA);
 
@@ -39,10 +39,10 @@ public final class StressTesterApp{
      * Starts the application.
      */
     public void start() throws Exception{
-        // Logging.
+        // logging
         LOGGER.log(Level.INFO, "Starting the Stress Tester App.");
         
-        // Start simulation.
+        // start simulation
         adapter.startSimulation();
     }
     
@@ -55,7 +55,7 @@ public final class StressTesterApp{
      */
     public static void main(final String args[]) throws Exception {
         try{
-            // Create and start the app.
+            // create and start the app
             StressTesterApp app = new StressTesterApp();
             app.start();
         }
