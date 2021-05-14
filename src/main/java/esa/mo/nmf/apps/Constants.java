@@ -2,7 +2,7 @@ package esa.mo.nmf.apps;
 
 public final class Constants {
 
-    // Hide constructor to restrict instantiation
+    // hide constructor to restrict instantiation
     private Constants() {}
 
     // experiment id

@@ -19,7 +19,7 @@ import org.w3c.dom.NodeList;
 public class DatapoolXmlManager {
     private static final Logger LOGGER = Logger.getLogger(DatapoolXmlManager.class.getName());
     
-    // Path to the datapool xml file.
+    // path to the datapool xml file
     private static final String XML_FILE_PATH = "Datapool.xml";
     
     private static final String XML_ELEM_PARAMETER = "parameter";
@@ -39,14 +39,14 @@ public class DatapoolXmlManager {
         UOctet,
     }
 
-    // The map containing all the parameter names grouped by there data type
+    // the map containing all the parameter names grouped by there data type
     private Map<String, List<String>> paramMap;
     
-    // Map used to track the latest param name index fetched from the param name lists
-    // This is used to make sure that each simulate app has a different set of param names.
+    // map used to track the latest param name index fetched from the param name lists
+    // this is used to make sure that each simulate app has a different set of param names
     private Map<String, Integer> paramListTrackerMap; 
     
-    // Singleton instance.
+    // singleton instance
     private static DatapoolXmlManager instance;
     
     /**
@@ -87,22 +87,22 @@ public class DatapoolXmlManager {
             for (int i = 0; i < nList.getLength(); i++) {
                 Node node = nList.item(i);
                 
-                // Build a Map of datapool parameters grouped by their types
+                // build a Map of datapool parameters grouped by their types
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
                     Element elem = (Element) node;
                     
                     String paramName = elem.getAttribute(XML_PARAM_NAME);
                     String paramType = elem.getAttribute(XML_PARAM_ATTRIBUTE_TYPE);
                     
-                    // Initialize the param name list for the first time we encounter a specific type
+                    // initialize the param name list for the first time we encounter a specific type
                     if(!this.paramMap.containsKey(paramType)) {
                         List<String> paramNames = new ArrayList<String>();
                         paramNames.add(paramName);
                         
-                        // Put initialized param name in list of param names
+                        // put initialized param name in list of param names
                         this.paramMap.put(paramType, paramNames);
                         
-                        // Also initialize the list tracker for the list of param names.
+                        // also initialize the list tracker for the list of param names.
                         this.paramListTrackerMap.put(paramType, Integer.valueOf(0));
                         
                     }else {
@@ -126,26 +126,26 @@ public class DatapoolXmlManager {
      * @return
      */
     public List<String> getParamNames(int count, DatapoolParamTypes type){
-        // Fetch all param names that are of the given type
+        // fetch all param names that are of the given type
         List<String> allParamNames = this.paramMap.get(type.name());
         
-        // Grab n amount of param names that satisfy the configure param count 
+        // grab n amount of param names that satisfy the configure param count 
         List<String> sampledParamNames = new ArrayList<String>();
         
-        // Fetch the index from which we need to start getting param names from the list of param names
+        // fetch the index from which we need to start getting param names from the list of param names
         int startIndex = this.paramListTrackerMap.get(type.name()).intValue();
         
-        // Declare the loop index here so that we can use it later
+        // declare the loop index here so that we can use it later
         int i;
         
         for(i = startIndex; i < (startIndex + count); i++) {
             sampledParamNames.add(allParamNames.get(i));
         }
         
-        // Update list index
+        // update list index
         this.paramListTrackerMap.put(type.name(), Integer.valueOf(i));
         
-        // Return param names that will be used for stress testing
+        // return param names that will be used for stress testing
         return sampledParamNames;
     }
 }

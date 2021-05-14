@@ -10,38 +10,38 @@ import java.util.logging.Logger;
 public class PropertiesManager {
     private static final Logger LOGGER = Logger.getLogger(PropertiesManager.class.getName());
     
-    // Path to the application configuration file.
+    // path to the application configuration file
     private static final String PROPERTIES_FILE_PATH = "config.properties";
     
-    // Prefix on property keys.
+    // prefix on property keys
     public static final String PROPS_PREFIX = "";
     
-    // Number of apps to simulate.
+    // number of apps to simulate
     public static final String PROPS_APP_COUNT = PROPS_PREFIX + "appCount";
     
-    // Number of loop iterations for a simulated app.
+    // number of loop iterations for a simulated app
     public static final String PROPS_APP_ITERATIONS = PROPS_PREFIX + "iterations";
     
-    // Loop iteration intervals in milliseconds.
+    // loop iteration intervals in milliseconds
     public static final String PROPS_APP_INTERVAL = PROPS_PREFIX + "interval";
     
-    // Number of datapool parameters to get.
+    // number of datapool parameters to get
     public static final String PROPS_APP_PARAMS_GET_COUNT = PROPS_PREFIX + "params.get.count";
     
-    // Number of datapool parameters to set.
+    // number of datapool parameters to set
     public static final String PROPS_APP_PARAMS_SET_COUNT = PROPS_PREFIX + "params.set.count";
     
-    // Configuration properties holder.
+    // configuration properties holder
     private Properties properties;
     
-    // Singleton instance.
+    // singleton instance
     private static PropertiesManager instance;
     
     /**
      * Hide constructor.
      */
     private PropertiesManager(){
-        // Load properties file.
+        // load properties file
         loadProperties();
     }
     
@@ -62,7 +62,7 @@ public class PropertiesManager {
      * Loads the properties from the configuration file.
      */
     public void loadProperties() {
-        // Read and load config properties file.
+        // read and load config properties file
         try (InputStream input = new FileInputStream(PROPERTIES_FILE_PATH)) {
             this.properties = new Properties();
             this.properties.load(input);
