@@ -1,12 +1,19 @@
 package esa.mo.nmf.apps;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 public class ApplicationManager {
 
     private static volatile ApplicationManager instance;
     private static Object mutex = new Object();
     
+    // Flag indicating if the app simulation threads should be stopped
     private boolean simKeepAlive = true;
+    
+    // Flag indicating we a data received listener has already been registered for the Aggregation service
+    private boolean aggregationListenerRegistered = false;
 
+    // Hide the constructor
     private ApplicationManager() {}
 
     public static ApplicationManager getInstance() {
@@ -38,6 +45,14 @@ public class ApplicationManager {
     
     public boolean isSimKeepAlive() {
         return this.simKeepAlive;
+    }
+    
+    public void setAggregationListenerRegistered(boolean registered) {
+        this.aggregationListenerRegistered = registered;
+    }
+    
+    public boolean isAggregationListenerRegistered(){
+        return this.aggregationListenerRegistered;
     }
 
 }

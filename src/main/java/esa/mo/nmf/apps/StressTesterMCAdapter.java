@@ -3,6 +3,7 @@ import java.util.logging.Logger;
 
 import org.ccsds.moims.mo.mal.provider.MALInteraction;
 
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
 import esa.mo.nmf.CloseAppListener;
@@ -12,6 +13,8 @@ import esa.mo.nmf.spacemoadapter.SpaceMOApdapterImpl;
 
 public class StressTesterMCAdapter extends MonitorAndControlNMFAdapter{
     private static final Logger LOGGER = Logger.getLogger(MonitorAndControlNMFAdapter.class.getName());
+    
+    public ReentrantLock aggregationListenerRegistrationLock = new ReentrantLock();
     
     private SimAppHandler simulationHandler;
     
@@ -102,6 +105,7 @@ public class StressTesterMCAdapter extends MonitorAndControlNMFAdapter{
         
         return success;
     }
+    
     
     /**
      * Returns the application's NMF consumer (consuming supervisor).

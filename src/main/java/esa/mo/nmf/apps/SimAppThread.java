@@ -6,17 +6,20 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.ccsds.moims.mo.mal.structures.UInteger;
 
 public class SimAppThread extends Thread {
     
     private static final Logger LOGGER = Logger.getLogger(SimAppThread.class.getName());
+    
+    private String logPrefix;
     
     private int id;
     private int interval;
     private int iterations;
     private List<String> paramsToGet;
     
-    private SimAppDataGetHandler dataHandler;
+    private SimAppDataGetHandler dataGetHandler;
     
     /**
      * Make default constructor inaccessible.
@@ -38,27 +41,38 @@ public class SimAppThread extends Thread {
         this.interval = interval;
         this.paramsToGet = paramsToGet;
         
+        this.logPrefix = "[App #" + this.id + "] ";
+        
         // Data handler for this simulated app instance.
         double intervalsInSeconds = interval / 1000;
-        this.dataHandler = new SimAppDataGetHandler(adapter, id, intervalsInSeconds, paramsToGet);
+        this.dataGetHandler = new SimAppDataGetHandler(adapter, id, intervalsInSeconds, paramsToGet);
         
-        this.dataHandler.toggleSupervisorParametersSubscription(true);
+        this.dataGetHandler.toggleSupervisorParametersSubscription(true);
     }
 
     @Override
     public void run() {
         
+        // Error code to check for errors
+        UInteger errorCode = null;
+        
         try {
             
             // Log start of simulation app.
-            LOGGER.log(Level.INFO,  "[App #" + this.id + "] Starting App, Fetching: " + String.join(", ", this.paramsToGet));
+            LOGGER.log(Level.INFO, this.logPrefix + "Starting App, Fetching: " + String.join(", ", this.paramsToGet));
             
             // Subscribe to parameter data provisioning service
-            this.dataHandler.toggleSupervisorParametersSubscription(true);
+            errorCode = this.dataGetHandler.toggleSupervisorParametersSubscription(true);
+            
+            // Check if no error
+            if(errorCode != null) {
+                LOGGER.log(Level.SEVERE, this.logPrefix + "Error Code " + errorCode.getValue() + ": Failed to subscribe to parameters service.");
+                return;
+            }
             
             for (int i = 1; i <= this.iterations; i++) {
                 
-                LOGGER.log(Level.INFO,  "[App #" + this.id + "] Iteration: " + i + "/" + this.iterations);
+                LOGGER.log(Level.INFO,this.logPrefix + "Iteration: " + i + "/" + this.iterations);
 
                 // Check if we are stopping the app B\before waiting to make the next request
                 if(!ApplicationManager.getInstance().isSimKeepAlive()) {
@@ -67,7 +81,7 @@ public class SimAppThread extends Thread {
                 
                 // Wait for a bit.
                 Thread.sleep(this.interval);
-                Pair<Long, Map<String, String>> parametersValues = this.dataHandler.getParametersValues();
+                Pair<Long, Map<String, String>> parametersValues = this.dataGetHandler.getParametersValues();
                 
                 Long timestamp = parametersValues.getLeft();
                 
@@ -76,7 +90,7 @@ public class SimAppThread extends Thread {
                 line.append(String.format("%.3f", timestamp / 1000.0));
                 line.append(",");
                 
-                for (String param : this.dataHandler.getParametersNames()) {
+                for (String param : this.dataGetHandler.getParametersNames()) {
                     String value = parametersValues.getRight().get(param);
                     
                     // skip samples with at least one null value
@@ -105,10 +119,16 @@ public class SimAppThread extends Thread {
             }
             
             // Unsubscribe to parameter data provisioning service
-            this.dataHandler.toggleSupervisorParametersSubscription(false);
+            errorCode = this.dataGetHandler.toggleSupervisorParametersSubscription(false);
+            
+         // Check if no error
+            if(errorCode != null) {
+                LOGGER.log(Level.SEVERE, this.logPrefix + "Error Code " + errorCode.getValue() + ": Failed to unsubscribe to parameters service.");
+                return;
+            }
                 
         } catch(InterruptedException e) {
-            LOGGER.log(Level.SEVERE, "[App #" + this.id + "]" + e.getMessage(), e);
+            LOGGER.log(Level.SEVERE, this.logPrefix + e.getMessage(), e);
         }
     }
 }

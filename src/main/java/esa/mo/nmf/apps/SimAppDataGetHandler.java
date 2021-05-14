@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.ccsds.moims.mo.com.structures.InstanceBooleanPair;
@@ -118,15 +119,15 @@ public class SimAppDataGetHandler {
                 adapter.getSupervisorSMA().getMCServices().getParameterService().getParameterStub();
 
       // list parameters to fetch and get their IDs from the supervisor
-      IdentifierList paramIdentifier = new IdentifierList();
-      this.parametersNames.stream().forEach(name -> paramIdentifier.add(new Identifier(name)));
+      IdentifierList paramIdentifierList = new IdentifierList();
+      this.parametersNames.stream().forEach(name -> paramIdentifierList.add(new Identifier(name)));
       ObjectInstancePairList objInstPairList;
       
       try {
-          objInstPairList = paramStub.listDefinition(paramIdentifier);
+          objInstPairList = paramStub.listDefinition(paramIdentifierList);
       } catch (MALInteractionException | MALException e) {
           LOGGER.log(Level.SEVERE, this.loggerMessagePrefix + "Error listing parameters to fetch in the supervisor", e);
-          return new UInteger(3);
+          return new UInteger(Constants.ERROR_LISTING_PARAMETERS_TO_FETCH);
       }
       
       // List of param ids
@@ -150,13 +151,25 @@ public class SimAppDataGetHandler {
                   return;
               }
           
+              // several aggregations are created: one for each SimAppThread instance
+              // make sure the correct aggregation instance is fetched 
               aggInstanceLock.lock();
-              aggInstance = aggregationInstance;
+              if(aggregationInstance.getName().getValue().equals(aggIdStr)) {
+                  aggInstance = aggregationInstance;
+              }
               aggInstanceLock.unlock();
           }
       };
 
-      adapter.getSupervisorSMA().addDataReceivedListener(this.aggregationListener);
+      // only register the aggregation listener once!
+      adapter.aggregationListenerRegistrationLock.lock();
+      if(!ApplicationManager.getInstance().isAggregationListenerRegistered()) {
+          adapter.getSupervisorSMA().addDataReceivedListener(this.aggregationListener);
+          
+          ApplicationManager.getInstance().setAggregationListenerRegistered(true);
+      }
+      adapter.aggregationListenerRegistrationLock.unlock();
+
       LOGGER.log(Level.INFO, this.loggerMessagePrefix + "Started fetching parameters from supervisor");
 
       return null;
@@ -186,11 +199,11 @@ public class SimAppDataGetHandler {
             // only log if error is unexpected
             if (!MALHelper.UNKNOWN_ERROR_NUMBER.equals(e.getStandardError().getErrorNumber())) {
                 LOGGER.log(Level.SEVERE, this.loggerMessagePrefix + "Error listing aggregations in the supervisor", e);
-                return new UInteger(4);
+                return new UInteger(Constants.ERROR_LISTING_AGGREGATIONS_UNKNOWN);
             }
         } catch (MALException e) {
             LOGGER.log(Level.SEVERE, this.loggerMessagePrefix + "Error listing aggregations in the supervisor", e);
-            return new UInteger(5);
+            return new UInteger(Constants.ERROR_LISTING_AGGREGATIONS);
         }
 
         // prepare aggregation details containing the parameters to fetch
@@ -216,7 +229,7 @@ public class SimAppDataGetHandler {
             } catch (MALInteractionException | MALException e) {
                 LOGGER.log(Level.SEVERE,
                         this.loggerMessagePrefix + "Error updating aggregation with parameters to fetch in the supervisor", e);
-                return new UInteger(6);
+                return new UInteger(Constants.ERROR_UPDATING_AGGREGATION);
             }
         }
       
@@ -239,12 +252,12 @@ public class SimAppDataGetHandler {
                 if (this.aggId == null) {
                     LOGGER.log(Level.SEVERE,
                             this.loggerMessagePrefix + "AddAggregation from supervisor didn't return an aggregation id");
-                    return new UInteger(7);
+                    return new UInteger(Constants.ERROR_ADDAGGREGATION_DID_NOT_RETURN_AGGREGATION_ID);
                 }
             } catch (MALInteractionException | MALException e) {
                 LOGGER.log(Level.SEVERE,
                         this.loggerMessagePrefix + "Error creating aggregation with parameters to fetch in the supervisor", e);
-                return new UInteger(8);
+                return new UInteger(Constants.ERROR_CREATING_AGGREGATION);
             }
         }
 
@@ -271,7 +284,7 @@ public class SimAppDataGetHandler {
             LOGGER.log(Level.SEVERE,
                     this.loggerMessagePrefix + "Error disabling generation of aggregation with parameters to fetch in the supervisor",
                     e);
-            return new UInteger(9);
+            return new UInteger(Constants.ERROR_DISABLING_AGGREGATION_GENERATION);
         }
 
         LOGGER.log(Level.INFO, this.loggerMessagePrefix + "Stopped fetching parameters from supervisor");
@@ -299,11 +312,11 @@ public class SimAppDataGetHandler {
         // read latest received aggregation
         else {
             timestamp = aggInstance.getTimestamp().getValue();
+            
             AggregationParameterValueList aggParamValueList =
             aggInstance.getAggregationValue().getParameterSetValues().get(0).getValues();
-        
+
             for (int i = 0; i < this.parametersNames.size(); i++) {
-                // FIXME: Out of bound exception here with index value.
                 ParameterValue paramValue = aggParamValueList.get(i).getValue();
                 String paramValueS = HelperAttributes.attribute2string(paramValue.getRawValue());
                 String paramName = this.parametersNames.get(i);
