@@ -20,13 +20,20 @@ public class AggregationWriter implements CompleteAggregationReceivedListener {
     
     private static final Logger LOGGER = Logger.getLogger(AggregationWriter.class.getName());
     
+    // flush data to file for this batch size of fetched data
+    private int flushWriteAt;
+    
     // csv file writer map, one per thread
     private Map<String, PrintWriter> csvWriterMap;
     
-    // map to count the numbre of data fetching iterations
+    // map to count the number of data fetching iterations
     private Map<String, Integer> iterationTrackerMap;
 
     public AggregationWriter() throws Exception{
+        
+        // flush write at
+        this.flushWriteAt = PropertiesManager.getInstance().getFlushWriteAt();
+        
         // instanciate our maps
         this.csvWriterMap = new HashMap<String, PrintWriter>();
         this.iterationTrackerMap = new HashMap<String, Integer>();
@@ -34,15 +41,20 @@ public class AggregationWriter implements CompleteAggregationReceivedListener {
         // get the thread count
         int threadCount = PropertiesManager.getInstance().getThreadCount();
         
-        // instanciate a csv file writer for each aggregation
+        
+        // initialize some stuff for each aggregation thread
         for(int threadId=1; threadId <= threadCount; threadId++) { 
+            
+            // initialize the flag indicating if the data fetching and writing process is complete or not.
+            ApplicationManager.getInstance().setDataFetchingComplete(threadId, false);
+            
             // build the aggregation id string
             String aggId = Utils.generateAggregationId(threadId);
             
             // initialize the iteration tracker map for eatch aggregation thread
             this.iterationTrackerMap.put(aggId, 0);
             
-            // instanciate a writer for the aggregation
+            // instanciate a csv file writer for each aggregation
             String csvOuptutFilepath = PropertiesManager.getInstance().getThreadCsvOutputFilepath(threadId);
             this.csvWriterMap.put(aggId, new PrintWriter(new File(csvOuptutFilepath)));
         }
@@ -74,11 +86,20 @@ public class AggregationWriter implements CompleteAggregationReceivedListener {
         String csvRow = timestamp + "," + String.join(",", paramValues) + "\n";
         this.csvWriterMap.get(aggId).print(csvRow);
         
-        // Get iteration counter for this aggregation
+        // get iteration counter for this aggregation
         int iterCounter = incrementIterationTracker(aggId);
         
-        // close the writer when we are finished fetching param values for the aggregation
+        // flush so that we still have written data in case of failure
+        if(iterCounter % this.flushWriteAt == 0) {
+            this.csvWriterMap.get(aggId).flush();
+        }
+        
+        // check if we are finished fetching param values for the aggregation
         if(iterCounter >= PropertiesManager.getInstance().getThreadIterations(threadId)) {
+            // set a flag to signal the aggregation thread that we are done and it can stop
+            ApplicationManager.getInstance().setDataFetchingComplete(threadId, true);
+            
+            // close the writer when we are finished 
             this.csvWriterMap.get(aggId).close();
         }
         
@@ -86,9 +107,9 @@ public class AggregationWriter implements CompleteAggregationReceivedListener {
         System.out.println("PROCESSED AGGREGATION INSTANCE FOR: " + aggId + ", WROTE CSV ROW #" + iterCounter);
         
         // TODO: flush after n iterations
-        // TODO: Stop writing after final iteration (destroy/unregister aggregation?)
-        // TODO: Stop app after all iterations complete
+        // TODO: stop app after all iterations complete
         // TODO: file writer exception handling
+        // TODO: writers must flush and close when the app is closed
 
     }
     

@@ -6,14 +6,12 @@ import java.util.logging.Logger;
 
 import org.ccsds.moims.mo.com.structures.InstanceBooleanPair;
 import org.ccsds.moims.mo.com.structures.InstanceBooleanPairList;
-import org.ccsds.moims.mo.mal.MALException;
 import org.ccsds.moims.mo.mal.MALHelper;
 import org.ccsds.moims.mo.mal.MALInteractionException;
 import org.ccsds.moims.mo.mal.structures.Duration;
 import org.ccsds.moims.mo.mal.structures.Identifier;
 import org.ccsds.moims.mo.mal.structures.IdentifierList;
 import org.ccsds.moims.mo.mal.structures.LongList;
-import org.ccsds.moims.mo.mal.structures.UInteger;
 import org.ccsds.moims.mo.mc.aggregation.consumer.AggregationStub;
 import org.ccsds.moims.mo.mc.aggregation.structures.AggregationCategory;
 import org.ccsds.moims.mo.mc.aggregation.structures.AggregationCreationRequest;
@@ -25,6 +23,8 @@ import org.ccsds.moims.mo.mc.aggregation.structures.AggregationParameterSetList;
 
 import org.ccsds.moims.mo.mc.parameter.consumer.ParameterStub;
 import org.ccsds.moims.mo.mc.structures.ObjectInstancePairList;
+
+import esa.mo.nmf.apps.exceptions.AddAggregationDidNotReturnAggregationId;
 
 
 public class DataPollingAggregationHandler {
@@ -77,55 +77,49 @@ public class DataPollingAggregationHandler {
      * @param subscribe True if we want supervisor to push new parameters data, false to stop the push
      * @return null if it was successful. If not null, then the returned value holds the error number
      */
-    public synchronized UInteger toggleSupervisorParametersSubscription(boolean subscribe) {    
+    public synchronized void toggleSupervisorParametersSubscription(boolean subscribe) throws Exception{    
         if (subscribe) {
-            return enableSupervisorParameterSubscription();
+            enableSupervisorParameterSubscription();
         } else {
-            return disableSupervisorParametersSubscription();
+            disableSupervisorParametersSubscription();
         }
     }
     
-    //public getParamIds
+    
+    public LongList getParamIds() throws Exception{
+        ParameterStub paramStub =
+            adapter.getSupervisorSMA().getMCServices().getParameterService().getParameterStub();
+    
+        // list parameters to fetch and get their IDs from the supervisor
+        IdentifierList paramIdentifierList = new IdentifierList();
+        this.paramNames.stream().forEach(name -> paramIdentifierList.add(new Identifier(name)));
+        
+        // list parameter definition
+        ObjectInstancePairList objInstPairList;
+        objInstPairList = paramStub.listDefinition(paramIdentifierList);
+
+        // build list of param ids
+        LongList paramIds = new LongList();
+        objInstPairList.stream()
+            .forEach(objInstPair -> paramIds.add(objInstPair.getObjIdentityInstanceId()));
+      
+        // return list of param ids
+        return paramIds;
+    }
 
     /**
      * Subscribes to the OBSW parameters values we need by creating and enabling an aggregation in the
      * aggregation service of the supervisor.
-     * 
-     * @return null if it was successful. If not null, then the returned value holds the error number
      */
-    private UInteger enableSupervisorParameterSubscription() {
-        ParameterStub paramStub =
-                adapter.getSupervisorSMA().getMCServices().getParameterService().getParameterStub();
-
-      // list parameters to fetch and get their IDs from the supervisor
-      IdentifierList paramIdentifierList = new IdentifierList();
-      this.paramNames.stream().forEach(name -> paramIdentifierList.add(new Identifier(name)));
-      ObjectInstancePairList objInstPairList;
-      
-      try {
-          objInstPairList = paramStub.listDefinition(paramIdentifierList);
-      } catch (MALInteractionException | MALException e) {
-          LOGGER.log(Level.SEVERE, this.logPrefix + "Error listing parameters to fetch in the supervisor", e);
-          return new UInteger(Constants.ERROR_LISTING_PARAMETERS_TO_FETCH);
-      }
-      
-      // list of param ids
-      LongList paramIds = new LongList();
-      
-      objInstPairList.stream()
-          .forEach(objInstPair -> paramIds.add(objInstPair.getObjIdentityInstanceId()));
-
-      // create (or update) and enable an aggregation for the parameters to fetch
-      UInteger error = createOrUpdateAggForParams(paramIds);
-      if (error != null) {
-          return error;
-      }
-      
-      LOGGER.log(Level.INFO, this.logPrefix + "Started fetching parameters from supervisor");
-
-      return null;
+    private void enableSupervisorParameterSubscription() throws Exception{
+        // get parameter ids
+        LongList paramIds = getParamIds();
+        
+        // create (or update) and enable an aggregation for the parameters to fetch
+        createOrUpdateAggForParams(paramIds);
+  
+        LOGGER.log(Level.INFO, this.logPrefix + "Started fetching parameters from supervisor");
     }
-    
     
 
     /**
@@ -135,7 +129,7 @@ public class DataPollingAggregationHandler {
      * @param paramIds Instance ids of the parameters
      * @return null if it was successful. If not null, then the returned value holds the error number
      */
-    private UInteger createOrUpdateAggForParams(LongList paramIds) {
+    private void createOrUpdateAggForParams(LongList paramIds) throws Exception{
         AggregationStub aggStub =
                 adapter.getSupervisorSMA().getMCServices().getAggregationService().getAggregationStub();
       
@@ -145,18 +139,15 @@ public class DataPollingAggregationHandler {
         IdentifierList identifierList = new IdentifierList();
         identifierList.add(aggIdentifier);
       
+        // get aggregation id
         try {
             ObjectInstancePairList objInstPairList = aggStub.listDefinition(identifierList);
-            this.aggId = objInstPairList.get(0).getObjIdentityInstanceId();
+            aggId = objInstPairList.get(0).getObjIdentityInstanceId();
         } catch (MALInteractionException e) {
-            // only log if error is unexpected
+            // only throw exception if the error is unexpected
             if (!MALHelper.UNKNOWN_ERROR_NUMBER.equals(e.getStandardError().getErrorNumber())) {
-                LOGGER.log(Level.SEVERE, this.logPrefix + "Error listing aggregations in the supervisor", e);
-                return new UInteger(Constants.ERROR_LISTING_AGGREGATIONS_UNKNOWN);
+                throw e;
             }
-        } catch (MALException e) {
-            LOGGER.log(Level.SEVERE, this.logPrefix + "Error listing aggregations in the supervisor", e);
-            return new UInteger(Constants.ERROR_LISTING_AGGREGATIONS);
         }
 
         // prepare aggregation details containing the parameters to fetch
@@ -177,71 +168,46 @@ public class DataPollingAggregationHandler {
             AggregationDefinitionDetailsList aggDetailsList = new AggregationDefinitionDetailsList();
             aggDetailsList.add(aggDetails);
 
-            try {
-                aggStub.updateDefinition(aggIdList, aggDetailsList);
-            } catch (MALInteractionException | MALException e) {
-                LOGGER.log(Level.SEVERE,
-                        this.logPrefix + "Error updating aggregation with parameters to fetch in the supervisor", e);
-                return new UInteger(Constants.ERROR_UPDATING_AGGREGATION);
-            }
-        }
-      
-        // create new definition
-        else {
+            aggStub.updateDefinition(aggIdList, aggDetailsList);
+        
+        } else { 
+            // create new definition
             AggregationCreationRequest aggCreationRequest =
                     new AggregationCreationRequest(aggIdentifier, aggDetails);
         
             AggregationCreationRequestList aggCreationRequestList = new AggregationCreationRequestList();
             aggCreationRequestList.add(aggCreationRequest);
         
-            try {
-                ObjectInstancePairList aggObjInstPairList = aggStub.addAggregation(aggCreationRequestList);
-          
-                // check the aggregation was created successfully
-                if (aggObjInstPairList.size() > 0 && aggObjInstPairList.get(0).getObjIdentityInstanceId() != null) {
-                    this.aggId = aggObjInstPairList.get(0).getObjIdentityInstanceId();
-                }
-                
-                if (this.aggId == null) {
-                    LOGGER.log(Level.SEVERE,
-                            this.logPrefix + "AddAggregation from supervisor didn't return an aggregation id");
-                    return new UInteger(Constants.ERROR_ADDAGGREGATION_DID_NOT_RETURN_AGGREGATION_ID);
-                }
-            } catch (MALInteractionException | MALException e) {
-                LOGGER.log(Level.SEVERE,
-                        this.logPrefix + "Error creating aggregation with parameters to fetch in the supervisor", e);
-                return new UInteger(Constants.ERROR_CREATING_AGGREGATION);
+            // add aggregation
+            ObjectInstancePairList aggObjInstPairList = aggStub.addAggregation(aggCreationRequestList);
+      
+            // check if the aggregation was successfully created
+            if (aggObjInstPairList.size() > 0 && aggObjInstPairList.get(0).getObjIdentityInstanceId() != null) {
+                this.aggId = aggObjInstPairList.get(0).getObjIdentityInstanceId();
+            }
+            
+            if (this.aggId == null) {
+                throw new AddAggregationDidNotReturnAggregationId("AddAggregation didn't return an aggregation id.");
             }
         }
-
-      return null;
     }
 
     /**
      * Stops the subscription to the OBSW parameters values by disabling the generation of the
      * aggregation we created in the aggregation service of the supervisor.
-     * 
-     * @return null if it was successful. If not null, then the returned value holds the error number
      */
-    private UInteger disableSupervisorParametersSubscription() {
+    private void disableSupervisorParametersSubscription() throws Exception{
+        // get aggregation stub
         AggregationStub aggStub = 
                 adapter.getSupervisorSMA().getMCServices().getAggregationService().getAggregationStub();
 
-        // disable generation of our aggregation
+        // disable generation of aggregation
         InstanceBooleanPairList instBoolPairList = new InstanceBooleanPairList();
         instBoolPairList.add(new InstanceBooleanPair(this.aggId, false));
+        aggStub.enableGeneration(false, instBoolPairList);
       
-        try {
-            aggStub.enableGeneration(false, instBoolPairList);
-        } catch (MALInteractionException | MALException e) {
-            LOGGER.log(Level.SEVERE,
-                    this.logPrefix + "Error disabling generation of aggregation with parameters to fetch in the supervisor",
-                    e);
-            return new UInteger(Constants.ERROR_DISABLING_AGGREGATION_GENERATION);
-        }
-
+        // log
         LOGGER.log(Level.INFO, this.logPrefix + "Stopped fetching parameters from supervisor");
-        return null;
     }
 
 }

@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.ccsds.moims.mo.mal.structures.UInteger;
-
 import esa.mo.nmf.apps.DatapoolXmlManager.DatapoolParamTypes;
 
 
@@ -13,12 +11,13 @@ public class DataPollingThread extends Thread {
     
     private static final Logger LOGGER = Logger.getLogger(DataPollingThread.class.getName());
     
+    // log prefix
     private String logPrefix;
     
+    // thread id
     private int id;
-    private int iterations;
-    private int interval;
     
+    // parameter names
     List<String> paramNames;
     
     private DataPollingAggregationHandler dataPollingAggregationHandler;
@@ -39,9 +38,7 @@ public class DataPollingThread extends Thread {
      */
     DataPollingThread(DataPollingAppMCAdapter adapter, int id, int iterations, int interval) throws Exception{
         this.id = id;
-        this.iterations = iterations;
-        this.interval = interval;
-        
+
         // interval in seconds
         double intervalsInSeconds = interval / 1000;
         
@@ -66,39 +63,28 @@ public class DataPollingThread extends Thread {
     }
 
     @Override
-    public void run() {
-        
-        // error code to check for errors
-        UInteger errorCode = null;
-        
+    public void run() { 
         try {
-            
             // log start of simulation app
             LOGGER.log(Level.INFO, this.logPrefix + "Starting app to fetch: " + String.join(", ", this.paramNames));
             
             // subscribe to parameter data provisioning service
-            errorCode = this.dataPollingAggregationHandler.toggleSupervisorParametersSubscription(true);
-            
-            // check if no error
-            if(errorCode != null) {
-                LOGGER.log(Level.SEVERE, this.logPrefix + "Error Code " + errorCode.getValue() + ": Failed to subscribe to parameters service.");
-                return;
-            }
-            
-            
+            this.dataPollingAggregationHandler.toggleSupervisorParametersSubscription(true);
+
+            // thread loop
             while(ApplicationManager.getInstance().isDataPollingThreadsKeepAlive()){
                 Thread.sleep(1000);
+                
+                // break out of the loop with iteration is complete 
+                if(ApplicationManager.getInstance().isDataFetchingComplete(this.id)) {
+                    break;
+                }
+               
             }
             
             // unsubscribe to parameter data provisioning service
-            errorCode = this.dataPollingAggregationHandler.toggleSupervisorParametersSubscription(false);
-            
-            // check if no error
-            if(errorCode != null) {
-                LOGGER.log(Level.SEVERE, this.logPrefix + "Error Code " + errorCode.getValue() + ": Failed to unsubscribe to parameters service.");
-                return;
-            }
-                
+            this.dataPollingAggregationHandler.toggleSupervisorParametersSubscription(false);
+ 
         } catch(Exception e) {
             LOGGER.log(Level.SEVERE, this.logPrefix + e.getMessage(), e);
         }

@@ -19,6 +19,9 @@ public class PropertiesManager {
     // number of threads to spawn
     public static final String PROPS_THREADS = PROPS_PREFIX + "threads";
     
+    // flush data to file for this batch size of fetched data
+    public static final String PROPS_FLUSH_WRITE_AT = PROPS_PREFIX + "flush.write.at";
+    
     // number of loop iterations for a simulated app
     public static final String PROPS_THREAD_ITERATIONS = PROPS_PREFIX + "iterations";
     
@@ -95,6 +98,10 @@ public class PropertiesManager {
     
     public int getThreadCount() {
         return Integer.parseInt(getProperty(PROPS_THREADS));
+    }
+    
+    public int getFlushWriteAt() {
+        return Integer.parseInt(getProperty(PROPS_FLUSH_WRITE_AT));
     }
     
     /**

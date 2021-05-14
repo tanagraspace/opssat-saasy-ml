@@ -3,6 +3,7 @@ package esa.mo.nmf.apps;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ApplicationManager {
 
@@ -14,11 +15,15 @@ public class ApplicationManager {
     
     // parameter names to fetch for each aggregation thread
     private Map<String, List<String>> paramNamesMap;
+    
+    // track if we are finished fetching data or not for each aggregation thread
+    private Map<String, Boolean> dataFetchingCompleteMap;
 
     // hide the constructor
     private ApplicationManager() {
         this.dataPollingThreadsKeepAlive = true;
         this.paramNamesMap =  new HashMap<String, List<String>>();
+        this.dataFetchingCompleteMap = new ConcurrentHashMap<String, Boolean>();
     }
 
     public static ApplicationManager getInstance() {
@@ -61,6 +66,22 @@ public class ApplicationManager {
             return paramNamesMap.get(threadIdStr);
         }else {
             return null;
+        }
+    }
+    
+    public void setDataFetchingComplete(int threadId, boolean complete){
+        String threadIdStr = Integer.toString(threadId);
+        this.dataFetchingCompleteMap.put(threadIdStr, complete);
+    }
+    
+    public boolean isDataFetchingComplete(int threadId) {
+        String threadIdStr = Integer.toString(threadId);
+        
+        if(dataFetchingCompleteMap.containsKey(threadIdStr)) {
+            return dataFetchingCompleteMap.get(threadIdStr);
+        }else {
+            // If key is not present then data fetching has not started
+            return false;
         }
     }
 }
