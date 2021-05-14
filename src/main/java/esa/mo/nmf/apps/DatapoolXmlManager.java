@@ -123,7 +123,7 @@ public class DatapoolXmlManager {
     }
     
     /**
-     * Get a list of parameter names.
+     * Get a list of parameter names given a desired amount and data type
      * @param count how many params to fetch
      * @param type the types of params to fetch
      * @return
@@ -148,6 +148,7 @@ public class DatapoolXmlManager {
                             allParamNamesForRequestedType.size() + ".");
         }
         
+        // Build list of param names
         for(i = startIndex; i < (startIndex + count); i++) {
             sampledParamNames.add(allParamNamesForRequestedType.get(i));
         }

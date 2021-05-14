@@ -1,14 +1,9 @@
 package esa.mo.nmf.apps;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.ccsds.moims.mo.com.structures.InstanceBooleanPair;
 import org.ccsds.moims.mo.com.structures.InstanceBooleanPairList;
 import org.ccsds.moims.mo.mal.MALException;
@@ -27,13 +22,9 @@ import org.ccsds.moims.mo.mc.aggregation.structures.AggregationDefinitionDetails
 import org.ccsds.moims.mo.mc.aggregation.structures.AggregationDefinitionDetailsList;
 import org.ccsds.moims.mo.mc.aggregation.structures.AggregationParameterSet;
 import org.ccsds.moims.mo.mc.aggregation.structures.AggregationParameterSetList;
-import org.ccsds.moims.mo.mc.aggregation.structures.AggregationParameterValueList;
+
 import org.ccsds.moims.mo.mc.parameter.consumer.ParameterStub;
-import org.ccsds.moims.mo.mc.parameter.structures.ParameterValue;
 import org.ccsds.moims.mo.mc.structures.ObjectInstancePairList;
-import esa.mo.helpertools.helpers.HelperAttributes;
-import esa.mo.mc.impl.provider.AggregationInstance;
-import esa.mo.nmf.commonmoadapter.CompleteAggregationReceivedListener;
 
 
 public class DataPollingAggregationHandler {
@@ -44,15 +35,6 @@ public class DataPollingAggregationHandler {
     
     // M&C interface of the application
     private final DataPollingAppMCAdapter adapter;
-
-    // lock for accessing our latest aggregation instance received from supervisor
-    private final ReentrantLock aggInstanceLock = new ReentrantLock();
-
-    // latest aggregation instance received from supervisor
-    private AggregationInstance aggInstance;
-
-    // the listener for parameters values coming from supervisor
-    private CompleteAggregationReceivedListener aggregationListener;
     
     // aggregation Id string
     private String aggIdStr;
@@ -62,15 +44,12 @@ public class DataPollingAggregationHandler {
     
     // aggregation description
     private String aggDescription;
-
-    // the id of the data polling thread
-    private int threadId;
     
     // time interval between 2 sampling iterations in milliseconds for the simulated app
     private double paramSamplingInterval;
     
     // supervisor (OBSW) parameters names
-    private List<String> parametersNames;
+    private List<String> paramNames;
     
     // prefix for log messages so that we know what simulated app instance triggered the log message
     private String logPrefix;
@@ -82,16 +61,14 @@ public class DataPollingAggregationHandler {
      * @param paramSamplingInterval sampling interval in seconds
      * @param parametersNames names of datapool parameters to sample
      */
-    public DataPollingAggregationHandler(DataPollingAppMCAdapter adapter, int threadId, double paramSamplingInterval, List<String> parametersNames) {
+    public DataPollingAggregationHandler(DataPollingAppMCAdapter adapter, int threadId, double paramSamplingInterval, List<String> paramNames) throws Exception{
         this.adapter = adapter;
-        this.threadId = threadId;
         this.paramSamplingInterval = paramSamplingInterval;
-        this.parametersNames = parametersNames;
+        this.paramNames = paramNames;
         
-        this.aggIdStr = "Exp" + Constants.EXPERIMENT_ID + "_App" + this.threadId + "_Agg";
-        this.aggDescription = "Exp" + Constants.EXPERIMENT_ID  + " App #" + this.threadId + " Aggregation";
-        
-        this.logPrefix = "[App #" + this.threadId + "] ";
+        this.aggIdStr = Utils.generateAggregationId(threadId);
+        this.aggDescription = Utils.generateAggregationDescription(threadId);
+        this.logPrefix = Utils.generateLogPrefix(threadId);
     }
 
     /**
@@ -107,6 +84,8 @@ public class DataPollingAggregationHandler {
             return disableSupervisorParametersSubscription();
         }
     }
+    
+    //public getParamIds
 
     /**
      * Subscribes to the OBSW parameters values we need by creating and enabling an aggregation in the
@@ -120,7 +99,7 @@ public class DataPollingAggregationHandler {
 
       // list parameters to fetch and get their IDs from the supervisor
       IdentifierList paramIdentifierList = new IdentifierList();
-      this.parametersNames.stream().forEach(name -> paramIdentifierList.add(new Identifier(name)));
+      this.paramNames.stream().forEach(name -> paramIdentifierList.add(new Identifier(name)));
       ObjectInstancePairList objInstPairList;
       
       try {
@@ -141,39 +120,13 @@ public class DataPollingAggregationHandler {
       if (error != null) {
           return error;
       }
-
-      // create and register the aggregation listener
-      this.aggregationListener = new CompleteAggregationReceivedListener() {
-          @Override
-          public void onDataReceived(AggregationInstance aggregationInstance) {
-              if (aggregationInstance == null) {
-                  LOGGER.log(Level.WARNING, "Received null aggregation instance");
-                  return;
-              }
-          
-              // several aggregations are created: one for each DataPollingThread instance
-              // make sure the correct aggregation instance is fetched 
-              aggInstanceLock.lock();
-              if(aggregationInstance.getName().getValue().equals(aggIdStr)) {
-                  aggInstance = aggregationInstance;
-              }
-              aggInstanceLock.unlock();
-          }
-      };
-
-      // only register the aggregation listener once!
-      adapter.aggregationListenerRegistrationLock.lock();
-      if(!ApplicationManager.getInstance().isAggregationListenerRegistered()) {
-          adapter.getSupervisorSMA().addDataReceivedListener(this.aggregationListener);
-          
-          ApplicationManager.getInstance().setAggregationListenerRegistered(true);
-      }
-      adapter.aggregationListenerRegistrationLock.unlock();
-
+      
       LOGGER.log(Level.INFO, this.logPrefix + "Started fetching parameters from supervisor");
 
       return null;
     }
+    
+    
 
     /**
      * Creates (or updates) and enables an aggregation in the supervisor containing the parameters to
@@ -223,7 +176,7 @@ public class DataPollingAggregationHandler {
             aggIdList.add(this.aggId);
             AggregationDefinitionDetailsList aggDetailsList = new AggregationDefinitionDetailsList();
             aggDetailsList.add(aggDetails);
-        
+
             try {
                 aggStub.updateDefinition(aggIdList, aggDetailsList);
             } catch (MALInteractionException | MALException e) {
@@ -289,56 +242,6 @@ public class DataPollingAggregationHandler {
 
         LOGGER.log(Level.INFO, this.logPrefix + "Stopped fetching parameters from supervisor");
         return null;
-    }
-
-    /**
-     * Returns latest parameters values fetched from supervisor with their timestamp.
-     *
-     * @return The time stamped (milliseconds) map of parameters names and their values
-     */
-    public Pair<Long, Map<String, String>> getParametersValues() {
-        Long timestamp;
-        Map<String, String> parametersValues = new HashMap<>();
-
-        aggInstanceLock.lock();
-      
-        // no aggregation received yet
-        if (aggInstance == null) {
-            for (String paramName : this.parametersNames) {
-                parametersValues.put(paramName, PARAMS_DEFAULT_VALUE);
-            }
-            timestamp = getTimestamp();
-        }
-        // read latest received aggregation
-        else {
-            timestamp = aggInstance.getTimestamp().getValue();
-            
-            AggregationParameterValueList aggParamValueList =
-            aggInstance.getAggregationValue().getParameterSetValues().get(0).getValues();
-
-            for (int i = 0; i < this.parametersNames.size(); i++) {
-                ParameterValue paramValue = aggParamValueList.get(i).getValue();
-                String paramValueS = HelperAttributes.attribute2string(paramValue.getRawValue());
-                String paramName = this.parametersNames.get(i);
-                parametersValues.put(paramName, paramValueS);
-            }
-        }
-      
-        aggInstanceLock.unlock();
-        return new ImmutablePair<>(timestamp, parametersValues);
-    }
-    
-    public List<String> getParametersNames(){
-        return this.parametersNames;
-    }
-
-    /**
-     * Returns a time stamp for the time of the call.
-     *
-     * @return the time stamp in milliseconds
-     */
-    public static long getTimestamp() {
-        return System.currentTimeMillis();
     }
 
 }

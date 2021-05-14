@@ -16,7 +16,10 @@ public final class DataPollingApp{
     // app Monitor and Control (M&C) Adapter
     private DataPollingAppMCAdapter adapter;
     
-    private DataPollingApp() {
+    private DataPollingApp() throws Exception{
+        
+        
+        
         // initialize M&C interface
         adapter = new DataPollingAppMCAdapter();
 
@@ -31,6 +34,8 @@ public final class DataPollingApp{
         // once all initialized, pass them to the M&C interface that handles the application's logic
         adapter.setConnector(connector);
         adapter.setSupervisorSMA(supervisorSMA);
+        
+        adapter.getSupervisorSMA().addDataReceivedListener(new AggregationWriter());
 
         LOGGER.log(Level.INFO, "Datapool Polling App initialized.");
     }

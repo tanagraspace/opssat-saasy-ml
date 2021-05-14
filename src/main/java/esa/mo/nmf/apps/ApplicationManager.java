@@ -1,27 +1,31 @@
 package esa.mo.nmf.apps;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class ApplicationManager {
 
     private static volatile ApplicationManager instance;
     private static Object mutex = new Object();
     
-    // flag indicating if the app simulation threads should be stopped
-    private boolean dataPollingThreadsKeepAlive = true;
+    // flag indicating if all threads should be stopped
+    private boolean dataPollingThreadsKeepAlive;
     
-    // flag indicating we a data received listener has already been registered for the Aggregation service
-    private boolean aggregationListenerRegistered = false;
+    // parameter names to fetch for each aggregation thread
+    private Map<String, List<String>> paramNamesMap;
 
     // hide the constructor
-    private ApplicationManager() {}
+    private ApplicationManager() {
+        this.dataPollingThreadsKeepAlive = true;
+        this.paramNamesMap =  new HashMap<String, List<String>>();
+    }
 
     public static ApplicationManager getInstance() {
-        
-        /**
-         * The local variable result seems unnecessary. But, it’s there to improve the performance of our code.
-         * In cases where the instance is already initialized (most of the time), the volatile field is only accessed once (due to "return result;" instead of "return instance;").
-         * This can improve the method’s overall performance by as much as 25 percent.
-         * Source: https://www.journaldev.com/171/thread-safety-in-java-singleton-classes
-         */
+        // the local variable result seems unnecessary but it's there to improve performance
+        // in cases where the instance is already initialized (most of the time), the volatile field is only accessed once (due to "return result;" instead of "return instance;").
+        // this can improve the method’s overall performance by as much as 25 percent.
+        // source: https://www.journaldev.com/171/thread-safety-in-java-singleton-classes
         ApplicationManager result = instance;
         
         // enforce Singleton design pattern
@@ -45,12 +49,18 @@ public class ApplicationManager {
         return this.dataPollingThreadsKeepAlive;
     }
     
-    public void setAggregationListenerRegistered(boolean registered) {
-        this.aggregationListenerRegistered = registered;
+    public void setParamNames(int threadId, List<String> paramNames){
+        String threadIdStr = Integer.toString(threadId);
+        this.paramNamesMap.put(threadIdStr, paramNames);
     }
     
-    public boolean isAggregationListenerRegistered(){
-        return this.aggregationListenerRegistered;
+    public List<String> getParamNames(int threadId){
+        String threadIdStr = Integer.toString(threadId);
+        
+        if(paramNamesMap.containsKey(threadIdStr)) {
+            return paramNamesMap.get(threadIdStr);
+        }else {
+            return null;
+        }
     }
-
 }

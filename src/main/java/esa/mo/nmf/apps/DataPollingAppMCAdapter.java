@@ -1,7 +1,6 @@
 package esa.mo.nmf.apps;
 import java.util.logging.Logger;
 
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
 import esa.mo.nmf.CloseAppListener;
@@ -11,8 +10,6 @@ import esa.mo.nmf.spacemoadapter.SpaceMOApdapterImpl;
 
 public class DataPollingAppMCAdapter extends MonitorAndControlNMFAdapter{
     private static final Logger LOGGER = Logger.getLogger(MonitorAndControlNMFAdapter.class.getName());
-    
-    public ReentrantLock aggregationListenerRegistrationLock = new ReentrantLock();
     
     private DataPollingThreadHandler dataPollingThreadHandler;
     
@@ -79,8 +76,7 @@ public class DataPollingAppMCAdapter extends MonitorAndControlNMFAdapter{
     public boolean onClose(boolean requestFromUser) {
         boolean success = true;
         
-        // signal the simulation threads to exit their loops
-        // FIXME: simulation thread may still be sleeping before it gets the signal. Might have to use Thread.interrupt()
+        // signal the aggregation threads to exit their loops
         dataPollingThreadHandler.stopDataPollingThreads();
         
         // close supervisor consumer connections

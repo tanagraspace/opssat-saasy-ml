@@ -34,6 +34,8 @@ public class PropertiesManager {
     // number of datapool parameters to set
     public static final String PROPS_THREAD_PARAMS_SET_COUNT = PROPS_PREFIX + "params.set.count";
     
+    public static final String PROPS_CSV_OUTPUT_FILEPATH = PROPS_PREFIX + "params.get.output.csv";
+    
     // configuration properties holder
     private Properties properties;
     
@@ -54,7 +56,7 @@ public class PropertiesManager {
      *
      * @return the PropertiesManager instance.
      */
-    public static PropertiesManager getinstance() {
+    public static PropertiesManager getInstance() {
         if (instance == null) {
             instance = new PropertiesManager();
         }
@@ -91,6 +93,16 @@ public class PropertiesManager {
         return property;
     }
     
+    public int getThreadCount() {
+        return Integer.parseInt(getProperty(PROPS_THREADS));
+    }
+    
+    /**
+     * Get property for a thread with the given id.
+     * @param threadId
+     * @param key
+     * @return
+     */
     public String getThreadProperty(int threadId, String key) {
         String appPropKey = key + "." + threadId;
         return getProperty(appPropKey);
@@ -110,6 +122,10 @@ public class PropertiesManager {
     
     public String getThreadParamsGetType(int threadId) {
         return getThreadProperty(threadId, PROPS_THREAD_PARAMS_GET_TYPE);
+    }
+    
+    public String getThreadCsvOutputFilepath(int threadId) {
+        return getThreadProperty(threadId, PROPS_CSV_OUTPUT_FILEPATH);
     }
     
     public int getThreadParamsSetCount(int threadId) {
