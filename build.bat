@@ -1,5 +1,6 @@
 :: Set variables
-SET PROJECT_DIR=C:\Users\Georges\Development\ESA\opssat\opssat-datapool-stresstester
+SET APP_NAME_SLUG=datapool-polling
+SET PROJECT_DIR=C:\Users\Georges\Development\ESA\opssat\opssat-datapool-polling
 SET NMF_SDK_PACKAGE_DIR=C:\Users\Georges\Development\ESA\opssat\nanosat-mo-framework\sdk\sdk-package
 
 :: Set run flag variable in case we want to build and run
@@ -16,8 +17,8 @@ CALL mvn clean install
 
 :: Return to the app repo directory and copy the config file
 CD %PROJECT_DIR%
-COPY conf\config.properties %NMF_SDK_PACKAGE_DIR%\target\nmf-sdk-2.1.0-SNAPSHOT\home\datapool-stresstester\config.properties
-COPY conf\datapool.xml %NMF_SDK_PACKAGE_DIR%\target\nmf-sdk-2.1.0-SNAPSHOT\home\datapool-stresstester\datapool.xml
+COPY conf\config.properties %NMF_SDK_PACKAGE_DIR%\target\nmf-sdk-2.1.0-SNAPSHOT\home\%APP_NAME_SLUG%\config.properties
+COPY conf\datapool.xml %NMF_SDK_PACKAGE_DIR%\target\nmf-sdk-2.1.0-SNAPSHOT\home\%APP_NAME_SLUG%\datapool.xml
 
 :: Start Supervisor
 if %RUN_FLAG%==1 START "NMF Supervisor" /D %NMF_SDK_PACKAGE_DIR%\target\nmf-sdk-2.1.0-SNAPSHOT\home\nmf\nanosat-mo-supervisor-sim "nanosat-mo-supervisor-sim.bat"

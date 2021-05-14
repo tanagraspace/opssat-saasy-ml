@@ -1,5 +1,5 @@
-# OPS-SAT Datapool Stress Tester App
-An NMF App to stress test fetching and setting OBSW datapool parameters
+# OPS-SAT Datapool Polling App
+An NMF App to poll for OBSW datapool parameters.
 
 ## Installing
 
@@ -19,13 +19,13 @@ OS name: "windows 10", version: "10.0", arch: "amd64", family: "windows"
 ### Steps
 1. Install the `dev` branch of NanoSatMO Framework (NMF) following [the NMF quick start guide](https://nanosat-mo-framework.readthedocs.io/en/latest/quickstart.html)
 
-2. Get and build the Datapool Stress Tester application
+2. Get and build the application
 ```
-$ git clone https://github.com/georgeslabreche/opssat-datapool-stresstester
+$ git clone https://github.com/georgeslabreche/opssat-datapool-polling
 $ mvn install
 ```
 
-3. Deploy the application in the NMF SDK following [the NMF deployment guide](https://nanosat-mo-framework.readthedocs.io/en/latest/apps/packaging.html). Replacing instances of "sobel" by "datapool-stresstester" and "Sobel" by "StressTesterApp" in the main class name.
+3. Deploy the application in the NMF SDK following [the NMF deployment guide](https://nanosat-mo-framework.readthedocs.io/en/latest/apps/packaging.html). Replacing instances of "sobel" by "data-polling" and "Sobel" by "DataPollingApp" in the main class name.
 
 ## Starting
 Follow [the last 3 steps of the NMF SDK guide](https://nanosat-mo-framework.readthedocs.io/en/latest/sdk.html#running-the-cubesat-simulator). 

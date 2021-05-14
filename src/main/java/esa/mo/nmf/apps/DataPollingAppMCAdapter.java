@@ -9,27 +9,27 @@ import esa.mo.nmf.MonitorAndControlNMFAdapter;
 import esa.mo.nmf.nanosatmoconnector.NanoSatMOConnectorImpl;
 import esa.mo.nmf.spacemoadapter.SpaceMOApdapterImpl;
 
-public class StressTesterMCAdapter extends MonitorAndControlNMFAdapter{
+public class DataPollingAppMCAdapter extends MonitorAndControlNMFAdapter{
     private static final Logger LOGGER = Logger.getLogger(MonitorAndControlNMFAdapter.class.getName());
     
     public ReentrantLock aggregationListenerRegistrationLock = new ReentrantLock();
     
-    private SimAppHandler simulationHandler;
+    private DataPollingThreadHandler dataPollingThreadHandler;
     
-    public StressTesterMCAdapter() {
-        this.simulationHandler = new SimAppHandler(this);
+    public DataPollingAppMCAdapter() {
+        this.dataPollingThreadHandler = new DataPollingThreadHandler(this);
     }
     
-    public SimAppHandler getDataHandler() {
-        return simulationHandler;
+    public DataPollingThreadHandler getDataHandler() {
+        return dataPollingThreadHandler;
     }
     
-    public void startSimulation() throws Exception{
-        simulationHandler.startSimulation();
+    public void startDataPolling() throws Exception{
+        dataPollingThreadHandler.startDataPollingThreads();
     }
 
-    public void stopSimulation() throws Exception{
-        simulationHandler.stopSimulation();
+    public void stopDataPolling() throws Exception{
+        dataPollingThreadHandler.stopDataPollingThreads();
     }
 
     //----------------------------------- NMF components --------------------------------------------
@@ -65,7 +65,7 @@ public class StressTesterMCAdapter extends MonitorAndControlNMFAdapter{
          this.connector.setCloseAppListener(new CloseAppListener() {
              @Override
              public Boolean onClose() {
-                 return StressTesterMCAdapter.this.onClose(true);
+                 return DataPollingAppMCAdapter.this.onClose(true);
              }
         });
     }
@@ -80,8 +80,8 @@ public class StressTesterMCAdapter extends MonitorAndControlNMFAdapter{
         boolean success = true;
         
         // signal the simulation threads to exit their loops
-        // FIXME: Simulation thread may still be sleeping before it gets the signal. Might have to use Thread.interrupt()
-        simulationHandler.stopSimulation();
+        // FIXME: simulation thread may still be sleeping before it gets the signal. Might have to use Thread.interrupt()
+        dataPollingThreadHandler.stopDataPollingThreads();
         
         // close supervisor consumer connections
         supervisorSMA.closeConnections();

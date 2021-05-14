@@ -16,23 +16,23 @@ public class PropertiesManager {
     // prefix on property keys
     public static final String PROPS_PREFIX = "";
     
-    // number of apps to simulate
-    public static final String PROPS_APP_COUNT = PROPS_PREFIX + "appCount";
+    // number of threads to spawn
+    public static final String PROPS_THREADS = PROPS_PREFIX + "threads";
     
     // number of loop iterations for a simulated app
-    public static final String PROPS_APP_ITERATIONS = PROPS_PREFIX + "iterations";
+    public static final String PROPS_THREAD_ITERATIONS = PROPS_PREFIX + "iterations";
     
     // loop iteration intervals in milliseconds
-    public static final String PROPS_APP_INTERVAL = PROPS_PREFIX + "interval";
+    public static final String PROPS_THREAD_INTERVAL = PROPS_PREFIX + "interval";
     
     // number of datapool parameters to get
-    public static final String PROPS_APP_PARAMS_GET_COUNT = PROPS_PREFIX + "params.get.count";
+    public static final String PROPS_THREAD_PARAMS_GET_COUNT = PROPS_PREFIX + "params.get.count";
     
     // the type of parameters to get
-    public static final String PROPS_APP_PARAMS_GET_TYPE = PROPS_PREFIX + "params.get.type";
+    public static final String PROPS_THREAD_PARAMS_GET_TYPE = PROPS_PREFIX + "params.get.type";
     
     // number of datapool parameters to set
-    public static final String PROPS_APP_PARAMS_SET_COUNT = PROPS_PREFIX + "params.set.count";
+    public static final String PROPS_THREAD_PARAMS_SET_COUNT = PROPS_PREFIX + "params.set.count";
     
     // configuration properties holder
     private Properties properties;
@@ -91,28 +91,28 @@ public class PropertiesManager {
         return property;
     }
     
-    public String getAppSimProperty(int appId, String key) {
-        String appPropKey = key + "." + appId;
+    public String getThreadProperty(int threadId, String key) {
+        String appPropKey = key + "." + threadId;
         return getProperty(appPropKey);
     }
     
-    public int getAppSimIterations(int appId) {
-        return Integer.parseInt(getAppSimProperty(appId, PROPS_APP_ITERATIONS));
+    public int getThreadIterations(int threadId) {
+        return Integer.parseInt(getThreadProperty(threadId, PROPS_THREAD_ITERATIONS));
     }
     
-    public int getAppSimInterval(int appId) {
-        return Integer.parseInt(getAppSimProperty(appId, PROPS_APP_INTERVAL));
+    public int getThreadInterval(int threadId) {
+        return Integer.parseInt(getThreadProperty(threadId, PROPS_THREAD_INTERVAL));
     }
     
-    public int getAppSimParamsGetCount(int appId) {
-        return Integer.parseInt(getAppSimProperty(appId, PROPS_APP_PARAMS_GET_COUNT));
+    public int getThreadParamsGetCount(int threadId) {
+        return Integer.parseInt(getThreadProperty(threadId, PROPS_THREAD_PARAMS_GET_COUNT));
     }
     
-    public String getAppSimParamsGetType(int appId) {
-        return getAppSimProperty(appId, PROPS_APP_PARAMS_GET_TYPE);
+    public String getThreadParamsGetType(int threadId) {
+        return getThreadProperty(threadId, PROPS_THREAD_PARAMS_GET_TYPE);
     }
     
-    public int getAppSimParamsSetCount(int appId) {
-        return Integer.parseInt(getAppSimProperty(appId, PROPS_APP_PARAMS_SET_COUNT));
+    public int getThreadParamsSetCount(int threadId) {
+        return Integer.parseInt(getThreadProperty(threadId, PROPS_THREAD_PARAMS_SET_COUNT));
     }
 }

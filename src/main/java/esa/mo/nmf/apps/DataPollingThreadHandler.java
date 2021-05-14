@@ -6,16 +6,16 @@ import java.util.logging.Logger;
 
 import esa.mo.nmf.apps.DatapoolXmlManager.DatapoolParamTypes;
 
-public class SimAppHandler {
+public class DataPollingThreadHandler {
 
-    private static final Logger LOGGER = Logger.getLogger(SimAppHandler.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DataPollingThreadHandler.class.getName());
     
     /**
      * M&C interface of the application.
      */
-    private final StressTesterMCAdapter adapter;
+    private final DataPollingAppMCAdapter adapter;
     
-    public SimAppHandler(StressTesterMCAdapter adapter) {
+    public DataPollingThreadHandler(DataPollingAppMCAdapter adapter) {
         this.adapter = adapter;
     }
     
@@ -25,37 +25,37 @@ public class SimAppHandler {
      *
      * @return null if it was successful. If not null, then the returned value holds the error number
      */
-    public void startSimulation() throws Exception {
-        LOGGER.log(Level.INFO, "Starting app simulations...");
+    public void startDataPollingThreads() throws Exception {
+        LOGGER.log(Level.INFO, "Starting data polling threads...");
         
         // get numbers of apps to simulate
-        String appCountStr = PropertiesManager.getinstance().getProperty(PropertiesManager.PROPS_APP_COUNT);
+        String appCountStr = PropertiesManager.getinstance().getProperty(PropertiesManager.PROPS_THREADS);
         int appCount = Integer.parseInt(appCountStr);
         
         // instanciate app simulations as threads
-        for(int appId = 1; appId <= appCount; appId++) {
+        for(int threadId = 1; threadId <= appCount; threadId++) {
             
             // fetch app simulation iterations and interval
-            int iterations = PropertiesManager.getinstance().getAppSimIterations(appId);
-            int interval = PropertiesManager.getinstance().getAppSimInterval(appId);
+            int iterations = PropertiesManager.getinstance().getThreadIterations(threadId);
+            int interval = PropertiesManager.getinstance().getThreadInterval(threadId);
             
             // fetch how many parameters to get
-            int paramGetCount = PropertiesManager.getinstance().getAppSimParamsGetCount(appId);
+            int paramGetCount = PropertiesManager.getinstance().getThreadParamsGetCount(threadId);
             
             // fetch the parameter types
-            String paramTypeStr =  PropertiesManager.getinstance().getAppSimParamsGetType(appId);
+            String paramTypeStr =  PropertiesManager.getinstance().getThreadParamsGetType(threadId);
             DatapoolParamTypes paramType = DatapoolXmlManager.getinstance().getDatapoolParamTypeFromString(paramTypeStr);
                     
             // param names to be fetched by the app simulation
             List<String> paramsToGet = DatapoolXmlManager.getinstance().getParamNames(paramGetCount, paramType);
                     
             // start app simulation
-            SimAppThread appThread = new SimAppThread(this.adapter, appId, iterations, interval, paramsToGet);
+            DataPollingThread appThread = new DataPollingThread(this.adapter, threadId, iterations, interval, paramsToGet);
             appThread.start();
         }
     }
     
-    public void stopSimulation() {
-        ApplicationManager.getInstance().setSimKeepAlive(false);
+    public void stopDataPollingThreads() {
+        ApplicationManager.getInstance().setDataPollingThreadsKeepAlive(false);
     }
 }

@@ -6,19 +6,19 @@ import esa.mo.nmf.nanosatmoconnector.NanoSatMOConnectorImpl;
 import esa.mo.nmf.spacemoadapter.SpaceMOApdapterImpl;
 
 /**
- * Datapool Stress Tester App
+ * Datapool Polling App
  * 
  * @author Georges Labreche
  */
-public final class StressTesterApp{
-    private static final Logger LOGGER = Logger.getLogger(StressTesterApp.class.getName());
+public final class DataPollingApp{
+    private static final Logger LOGGER = Logger.getLogger(DataPollingApp.class.getName());
     
     // app Monitor and Control (M&C) Adapter
-    private StressTesterMCAdapter adapter;
+    private DataPollingAppMCAdapter adapter;
     
-    private StressTesterApp() {
+    private DataPollingApp() {
         // initialize M&C interface
-        adapter = new StressTesterMCAdapter();
+        adapter = new DataPollingAppMCAdapter();
 
         // initialize application's NMF provider
         NanoSatMOConnectorImpl connector = new NanoSatMOConnectorImpl();
@@ -32,7 +32,7 @@ public final class StressTesterApp{
         adapter.setConnector(connector);
         adapter.setSupervisorSMA(supervisorSMA);
 
-        LOGGER.log(Level.INFO, "Stress Tester App initialized.");
+        LOGGER.log(Level.INFO, "Datapool Polling App initialized.");
     }
     
     /**
@@ -40,10 +40,10 @@ public final class StressTesterApp{
      */
     public void start() throws Exception{
         // logging
-        LOGGER.log(Level.INFO, "Starting the Datapool Stress Tester App.");
+        LOGGER.log(Level.INFO, "Starting the Datapool Polling App.");
         
         // start simulation
-        adapter.startSimulation();
+        adapter.startDataPolling();
     }
     
     
@@ -56,7 +56,7 @@ public final class StressTesterApp{
     public static void main(final String args[]) throws Exception {
         try{
             // create and start the app
-            StressTesterApp app = new StressTesterApp();
+            DataPollingApp app = new DataPollingApp();
             app.start();
         }
         catch (Exception e){

@@ -6,7 +6,7 @@ public class ApplicationManager {
     private static Object mutex = new Object();
     
     // flag indicating if the app simulation threads should be stopped
-    private boolean simKeepAlive = true;
+    private boolean dataPollingThreadsKeepAlive = true;
     
     // flag indicating we a data received listener has already been registered for the Aggregation service
     private boolean aggregationListenerRegistered = false;
@@ -37,12 +37,12 @@ public class ApplicationManager {
         return result;
     }
     
-    public void setSimKeepAlive(boolean alive) {
-        this.simKeepAlive = alive;
+    public void setDataPollingThreadsKeepAlive(boolean alive) {
+        this.dataPollingThreadsKeepAlive = alive;
     }
     
-    public boolean isSimKeepAlive() {
-        return this.simKeepAlive;
+    public boolean isDataPollingThreadsKeepAlive() {
+        return this.dataPollingThreadsKeepAlive;
     }
     
     public void setAggregationListenerRegistered(boolean registered) {

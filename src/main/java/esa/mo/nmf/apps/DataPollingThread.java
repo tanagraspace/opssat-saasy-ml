@@ -8,24 +8,24 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.tuple.Pair;
 import org.ccsds.moims.mo.mal.structures.UInteger;
 
-public class SimAppThread extends Thread {
+public class DataPollingThread extends Thread {
     
-    private static final Logger LOGGER = Logger.getLogger(SimAppThread.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DataPollingThread.class.getName());
     
     private String logPrefix;
     
     private int id;
-    private int interval;
     private int iterations;
+    private int interval;
     private List<String> paramsToGet;
     
-    private SimAppDataGetHandler dataGetHandler;
+    private DataPollingAggregationHandler dataGetHandler;
     
     /**
      * Make default constructor inaccessible.
      */
     @SuppressWarnings("unused")
-    private SimAppThread(){}
+    private DataPollingThread(){}
     
     /**
      * 
@@ -35,7 +35,7 @@ public class SimAppThread extends Thread {
      * @param interval the interval between each loop iteration in the app simulation (in milliseconds)
      * @param paramsToGet
      */
-    SimAppThread(StressTesterMCAdapter adapter, int id, int iterations, int interval, List<String> paramsToGet) {
+    DataPollingThread(DataPollingAppMCAdapter adapter, int id, int iterations, int interval, List<String> paramsToGet) {
         this.id = id;
         this.iterations = iterations;
         this.interval = interval;
@@ -45,7 +45,7 @@ public class SimAppThread extends Thread {
         
         // data handler for this simulated app instance
         double intervalsInSeconds = interval / 1000;
-        this.dataGetHandler = new SimAppDataGetHandler(adapter, id, intervalsInSeconds, paramsToGet);
+        this.dataGetHandler = new DataPollingAggregationHandler(adapter, id, intervalsInSeconds, paramsToGet);
         
         this.dataGetHandler.toggleSupervisorParametersSubscription(true);
     }
@@ -75,7 +75,7 @@ public class SimAppThread extends Thread {
                 LOGGER.log(Level.INFO,this.logPrefix + "Iteration: " + i + "/" + this.iterations);
 
                 // check if we are stopping the app B\before waiting to make the next request
-                if(!ApplicationManager.getInstance().isSimKeepAlive()) {
+                if(!ApplicationManager.getInstance().isDataPollingThreadsKeepAlive()) {
                     break;
                 }
                 
@@ -94,7 +94,7 @@ public class SimAppThread extends Thread {
                     String value = parametersValues.getRight().get(param);
                     
                     // skip samples with at least one null value
-                    if (SimAppDataGetHandler.PARAMS_DEFAULT_VALUE.equals(value)) {
+                    if (DataPollingAggregationHandler.PARAMS_DEFAULT_VALUE.equals(value)) {
                         return;
                         }
                   
@@ -113,7 +113,7 @@ public class SimAppThread extends Thread {
                  * Note that the best way to stop a thread with long waits/sleeps is to use Thread.interrupt, see here:
                  * https://docs.oracle.com/javase/1.5.0/docs/guide/misc/threadPrimitiveDeprecation.html
                  */
-                if(!ApplicationManager.getInstance().isSimKeepAlive()) {
+                if(!ApplicationManager.getInstance().isDataPollingThreadsKeepAlive()) {
                     break;
                 }
             }

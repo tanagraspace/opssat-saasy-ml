@@ -22,6 +22,7 @@ public class DatapoolXmlManager {
     private static final Logger LOGGER = Logger.getLogger(DatapoolXmlManager.class.getName());
     
     // path to the datapool xml file
+    // FIXME: Can a list be fetched from NMF Supervisor?
     private static final String XML_FILE_PATH = "Datapool.xml";
     
     private static final String XML_ELEM_PARAMETER = "parameter";
