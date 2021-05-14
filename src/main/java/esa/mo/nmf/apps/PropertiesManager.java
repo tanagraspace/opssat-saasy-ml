@@ -28,6 +28,9 @@ public class PropertiesManager {
     // number of datapool parameters to get
     public static final String PROPS_APP_PARAMS_GET_COUNT = PROPS_PREFIX + "params.get.count";
     
+    // the type of parameters to get
+    public static final String PROPS_APP_PARAMS_GET_TYPE = PROPS_PREFIX + "params.get.type";
+    
     // number of datapool parameters to set
     public static final String PROPS_APP_PARAMS_SET_COUNT = PROPS_PREFIX + "params.set.count";
     
@@ -103,6 +106,10 @@ public class PropertiesManager {
     
     public int getAppSimParamsGetCount(int appId) {
         return Integer.parseInt(getAppSimProperty(appId, PROPS_APP_PARAMS_GET_COUNT));
+    }
+    
+    public String getAppSimParamsGetType(int appId) {
+        return getAppSimProperty(appId, PROPS_APP_PARAMS_GET_TYPE);
     }
     
     public int getAppSimParamsSetCount(int appId) {

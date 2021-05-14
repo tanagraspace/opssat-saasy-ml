@@ -35,16 +35,22 @@ public class SimAppHandler {
         // instanciate app simulations as threads
         for(int appId = 1; appId <= appCount; appId++) {
             
-            // fetch app simulation properties
+            // fetch app simulation iterations and interval
             int iterations = PropertiesManager.getinstance().getAppSimIterations(appId);
-            int intervals = PropertiesManager.getinstance().getAppSimInterval(appId);
+            int interval = PropertiesManager.getinstance().getAppSimInterval(appId);
+            
+            // fetch how many parameters to get
             int paramGetCount = PropertiesManager.getinstance().getAppSimParamsGetCount(appId);
+            
+            // fetch the parameter types
+            String paramTypeStr =  PropertiesManager.getinstance().getAppSimParamsGetType(appId);
+            DatapoolParamTypes paramType = DatapoolXmlManager.getinstance().getDatapoolParamTypeFromString(paramTypeStr);
                     
             // param names to be fetched by the app simulation
-            List<String> paramsToGet = DatapoolXmlManager.getinstance().getParamNames(paramGetCount, DatapoolParamTypes.Float);
+            List<String> paramsToGet = DatapoolXmlManager.getinstance().getParamNames(paramGetCount, paramType);
                     
             // start app simulation
-            SimAppThread appThread = new SimAppThread(this.adapter, appId, iterations, intervals, paramsToGet);
+            SimAppThread appThread = new SimAppThread(this.adapter, appId, iterations, interval, paramsToGet);
             appThread.start();
         }
     }

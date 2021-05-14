@@ -16,6 +16,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import esa.mo.nmf.apps.exceptions.NotEnoughParamsForRequestedType;
+
 public class DatapoolXmlManager {
     private static final Logger LOGGER = Logger.getLogger(DatapoolXmlManager.class.getName());
     
@@ -125,9 +127,9 @@ public class DatapoolXmlManager {
      * @param type the types of params to fetch
      * @return
      */
-    public List<String> getParamNames(int count, DatapoolParamTypes type){
+    public List<String> getParamNames(int count, DatapoolParamTypes type) throws NotEnoughParamsForRequestedType{
         // fetch all param names that are of the given type
-        List<String> allParamNames = this.paramMap.get(type.name());
+        List<String> allParamNamesForRequestedType = this.paramMap.get(type.name());
         
         // grab n amount of param names that satisfy the configure param count 
         List<String> sampledParamNames = new ArrayList<String>();
@@ -138,8 +140,15 @@ public class DatapoolXmlManager {
         // declare the loop index here so that we can use it later
         int i;
         
+        // throw exception in case there are not enough params for the requested type
+        if((startIndex + count) > allParamNamesForRequestedType.size()) {
+            throw new NotEnoughParamsForRequestedType(
+                    (startIndex + count) + " unique params of type " + type.toString() + " were requested but there are only "+ 
+                            allParamNamesForRequestedType.size() + ".");
+        }
+        
         for(i = startIndex; i < (startIndex + count); i++) {
-            sampledParamNames.add(allParamNames.get(i));
+            sampledParamNames.add(allParamNamesForRequestedType.get(i));
         }
         
         // update list index
@@ -147,5 +156,47 @@ public class DatapoolXmlManager {
         
         // return param names that will be used for stress testing
         return sampledParamNames;
+    }
+    
+    /**
+     * Get DatapoolParamType from its string representation.
+     * @param paramType
+     * @return
+     */
+    public DatapoolParamTypes getDatapoolParamTypeFromString(String paramType) {
+        
+        if(paramType.equalsIgnoreCase("Boolean")){
+            return DatapoolParamTypes.Boolean;
+            
+        }else if(paramType.equalsIgnoreCase("Double")){
+            return DatapoolParamTypes.Double;
+            
+        }else if(paramType.equalsIgnoreCase("Float")){
+            return DatapoolParamTypes.Float;
+            
+        }else if(paramType.equalsIgnoreCase("Integer")){
+            return DatapoolParamTypes.Integer;
+            
+        }else if(paramType.equalsIgnoreCase("Long")){
+            return DatapoolParamTypes.Long;
+            
+        }else if(paramType.equalsIgnoreCase("Octet")){
+            return DatapoolParamTypes.Octet;
+            
+        }else if(paramType.equalsIgnoreCase("Short")){
+            return DatapoolParamTypes.Short;
+            
+        }else if(paramType.equalsIgnoreCase("UInteger")){
+            return DatapoolParamTypes.UInteger;
+            
+        }else if(paramType.equalsIgnoreCase("UShort")){
+            return DatapoolParamTypes.UShort;
+            
+        }else if(paramType.equalsIgnoreCase("UOctet")){
+            return DatapoolParamTypes.UOctet;
+            
+        };
+        
+        return null;
     }
 }

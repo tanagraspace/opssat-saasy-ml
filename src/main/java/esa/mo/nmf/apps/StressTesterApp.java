@@ -40,7 +40,7 @@ public final class StressTesterApp{
      */
     public void start() throws Exception{
         // logging
-        LOGGER.log(Level.INFO, "Starting the Stress Tester App.");
+        LOGGER.log(Level.INFO, "Starting the Datapool Stress Tester App.");
         
         // start simulation
         adapter.startSimulation();
