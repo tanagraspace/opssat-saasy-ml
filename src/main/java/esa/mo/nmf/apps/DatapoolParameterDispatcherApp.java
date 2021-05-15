@@ -6,7 +6,7 @@ import esa.mo.nmf.nanosatmoconnector.NanoSatMOConnectorImpl;
 import esa.mo.nmf.spacemoadapter.SpaceMOApdapterImpl;
 
 /**
- * Datapool Polling DatapoolParameterDispatcherApp
+ * The main App class
  * 
  * @author Georges Labreche
  */
@@ -17,8 +17,6 @@ public final class DatapoolParameterDispatcherApp{
     private AppMCAdapter adapter;
     
     private DatapoolParameterDispatcherApp() throws Exception{
-        
-        
         
         // initialize M&C interface
         adapter = new AppMCAdapter();
@@ -37,7 +35,7 @@ public final class DatapoolParameterDispatcherApp{
         
         adapter.getSupervisorSMA().addDataReceivedListener(new AggregationWriter());
 
-        LOGGER.log(Level.INFO, "Datapool Polling DatapoolParameterDispatcherApp initialized.");
+        LOGGER.log(Level.INFO, "Initialized the app.");
     }
     
     /**
@@ -45,7 +43,7 @@ public final class DatapoolParameterDispatcherApp{
      */
     public void start() throws Exception{
         // logging
-        LOGGER.log(Level.INFO, "Starting the Datapool Polling DatapoolParameterDispatcherApp.");
+        LOGGER.log(Level.INFO, "Starting the app.");
         
         // start simulation
         adapter.startFetchingParameters();

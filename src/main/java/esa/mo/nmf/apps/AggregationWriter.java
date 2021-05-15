@@ -2,6 +2,8 @@ package esa.mo.nmf.apps;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,8 +56,33 @@ public class AggregationWriter implements CompleteAggregationReceivedListener {
             // initialize the iteration tracker map for each aggregation
             this.iterationTrackerMap.put(aggId, 0);
             
-            // instanciate a csv file writer for each aggregation
+            // the path of the CSV file
             String csvOuptutFilepath = PropertiesManager.getInstance().getThreadCsvOutputFilepath(threadId);
+            
+            // get file's parent directory path
+            Path csvOuptutFileDirPath = Paths.get(csvOuptutFilepath).getParent();
+            
+            // if parent directory path is null then the given file path is just a file name, roll with it
+            // however, if it's not null it means we need to create the parent directories if they don't exist
+            if(csvOuptutFileDirPath != null) {
+                
+                // create a "File" object of our directory path
+                // we do this because we want to call .exists() and .mkdirs()
+                File csvOuptutDirFile = csvOuptutFileDirPath.toFile();
+                
+                if (!csvOuptutDirFile.exists()) {
+                    if (!csvOuptutDirFile.mkdirs()) {
+                        LOGGER.log(Level.SEVERE,
+                            String.format("[WHAAAAAAAAAAAT] Couldn't create directories for file path %s", csvOuptutDirFile.getPath()));
+                    }else {
+                        LOGGER.log(Level.INFO, "[WHAAAAAAAAAAAT] Created directories for file path %s", csvOuptutDirFile.getPath());
+                    }
+                }else {
+                    System.out.println("WHAT HWTH WHAAAAAAAAAAAT EXISTS!");
+                }
+            }
+            
+            // instanciate a csv file writer for each aggregation
             this.csvWriterMap.put(aggId, new PrintWriter(new File(csvOuptutFilepath)));
         }
     }

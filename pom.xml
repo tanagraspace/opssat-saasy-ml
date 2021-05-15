@@ -9,11 +9,11 @@
     <version>2.1.0-SNAPSHOT</version>
   </parent>
   <groupId>esa.mo.nmf.apps</groupId>
-  <artifactId>datapool-stresstester</artifactId>
+  <artifactId>datapool-param-dispatcher</artifactId>
   <packaging>jar</packaging>
 
-  <name>Datapool Stress Tester</name>
-  <description>Stress test fetching parameters from the OBSW datapool as well as setting parameters to it.</description>
+  <name>Datapool Parameter Dispacher App</name>
+  <description>An NMF App for the OPS-SAT spacecraft that fetches parameters from the OBSW datapool and writes their values into CSV files.</description>
 
   <developers>
     <developer>
@@ -23,7 +23,7 @@
     </developer>
   </developers>
   <properties>
-    <assembly.mainClass>esa.mo.nmf.apps.DatapoolStressTesterApp</assembly.mainClass>
+    <assembly.mainClass>esa.mo.nmf.apps.DatapoolParameterDispatcherApp</assembly.mainClass>
     <maven.deploy.skip>true</maven.deploy.skip>
     <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
   </properties>
