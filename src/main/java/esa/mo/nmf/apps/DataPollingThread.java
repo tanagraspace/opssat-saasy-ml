@@ -71,12 +71,15 @@ public class DataPollingThread extends Thread {
             // subscribe to parameter data provisioning service
             this.dataPollingAggregationHandler.toggleSupervisorParametersSubscription(true);
 
-            // thread loop
-            while(ApplicationManager.getInstance().isDataPollingThreadsKeepAlive()){
+            // break out of the thread loop with iteration is complete 
+            while(!ApplicationManager.getInstance().isDataFetchingComplete(this.id)){
+                
+                // sleep
                 Thread.sleep(1000);
                 
-                // break out of the loop with iteration is complete 
-                if(ApplicationManager.getInstance().isDataFetchingComplete(this.id)) {
+                // also break out the thread loop if the application stop is triggered by the user
+                if(!ApplicationManager.getInstance().isDataPollingThreadsKeepAlive()) {
+                    // FIXME: flush print writer data that has not been written and close the print writer
                     break;
                 }
                

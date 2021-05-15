@@ -70,47 +70,45 @@ public class AggregationWriter implements CompleteAggregationReceivedListener {
         // get aggregation id
         String aggId = aggregationInstance.getName().getValue();
         
-        // get thread id
-        int threadId = Utils.getThreadIdFromAggId(aggId);
-        
-        // If it's the first aggregation data is received then write the csv header row
-        if(this.iterationTrackerMap.get(aggId) == 0) {
-            writeHeader(aggId); 
-        }
-        
-        // get aggregation timestamp and parameter values
-        Long timestamp = aggregationInstance.getTimestamp().getValue();
-        List<String> paramValues = getParameterValues(aggregationInstance);
-        
-        // write param values to csv file
-        String csvRow = timestamp + "," + String.join(",", paramValues) + "\n";
-        this.csvWriterMap.get(aggId).print(csvRow);
-        
-        // get iteration counter for this aggregation
-        int iterCounter = incrementIterationTracker(aggId);
-        
-        // flush so that we still have written data in case of failure
-        if(iterCounter % this.flushWriteAt == 0) {
-            this.csvWriterMap.get(aggId).flush();
-        }
-        
-        // check if we are finished fetching param values for the aggregation
-        if(iterCounter >= PropertiesManager.getInstance().getThreadIterations(threadId)) {
-            // set a flag to signal the aggregation thread that we are done and it can stop
-            ApplicationManager.getInstance().setDataFetchingComplete(threadId, true);
+        try {
             
-            // close the writer when we are finished 
-            this.csvWriterMap.get(aggId).close();
+            // get thread id
+            int threadId = Utils.getThreadIdFromAggId(aggId);
+            
+            // If it's the first aggregation data is received then write the csv header row
+            if(this.iterationTrackerMap.get(aggId) == 0) {
+                writeHeader(aggId); 
+            }
+            
+            // get aggregation timestamp and parameter values
+            Long timestamp = aggregationInstance.getTimestamp().getValue();
+            List<String> paramValues = getParameterValues(aggregationInstance);
+            
+            // write param values to csv file
+            String csvRow = timestamp + "," + String.join(",", paramValues) + "\n";
+            this.csvWriterMap.get(aggId).print(csvRow);
+            
+            // get iteration counter for this aggregation
+            int iterCounter = incrementIterationTracker(aggId);
+            
+            // flush so that we still have written data in case of failure
+            if(iterCounter % this.flushWriteAt == 0) {
+                this.csvWriterMap.get(aggId).flush();
+            }
+            
+            // check if we are finished fetching param values for the aggregation
+            if(iterCounter >= PropertiesManager.getInstance().getThreadIterations(threadId)) {
+                // set a flag to signal the aggregation thread that we are done and it can stop
+                ApplicationManager.getInstance().setDataFetchingComplete(threadId, true);
+                
+                // close the writer when we are finished 
+                this.csvWriterMap.get(aggId).close();
+            }
+        
+        }catch(Exception e) {
+            LOGGER.log(Level.SEVERE, "Error fetching and writing parameters for aggregation " + aggId, e);
         }
-        
-        // TODO: Remove
-        System.out.println("PROCESSED AGGREGATION INSTANCE FOR: " + aggId + ", WROTE CSV ROW #" + iterCounter);
-        
-        // TODO: flush after n iterations
-        // TODO: stop app after all iterations complete
-        // TODO: file writer exception handling
-        // TODO: writers must flush and close when the app is closed
-
+    
     }
     
     public void writeHeader(String aggId) {
@@ -141,7 +139,7 @@ public class AggregationWriter implements CompleteAggregationReceivedListener {
         // the list that will contain all the param values
         List<String> paramValues = new ArrayList<String>();
 
-        // the aggragration param value list
+        // the aggregration param value list
         AggregationParameterValueList aggParamValueList =
                 aggregationInstance.getAggregationValue().getParameterSetValues().get(0).getValues();
 
