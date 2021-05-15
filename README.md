@@ -1,5 +1,5 @@
 # OPS-SAT Datapool Parameter Dispatcher App
-An NMF App that fetches parameters from the OBSWM datapool and writes them to CSV files.
+An NMF App that fetches parameters from the OBSW datapool and writes their values to CSV files.
 
 ## Installing
 
