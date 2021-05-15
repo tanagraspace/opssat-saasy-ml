@@ -42,7 +42,7 @@ public class AggregationWriter implements CompleteAggregationReceivedListener {
         int threadCount = PropertiesManager.getInstance().getThreadCount();
         
         
-        // initialize some stuff for each aggregation thread
+        // initialize some stuff for each aggregation
         for(int threadId=1; threadId <= threadCount; threadId++) { 
             
             // initialize the flag indicating if the data fetching and writing process is complete or not.
@@ -51,7 +51,7 @@ public class AggregationWriter implements CompleteAggregationReceivedListener {
             // build the aggregation id string
             String aggId = Utils.generateAggregationId(threadId);
             
-            // initialize the iteration tracker map for eatch aggregation thread
+            // initialize the iteration tracker map for each aggregation
             this.iterationTrackerMap.put(aggId, 0);
             
             // instanciate a csv file writer for each aggregation
@@ -98,7 +98,7 @@ public class AggregationWriter implements CompleteAggregationReceivedListener {
             
             // check if we are finished fetching param values for the aggregation
             if(iterCounter >= PropertiesManager.getInstance().getThreadIterations(threadId)) {
-                // set a flag to signal the aggregation thread that we are done and it can stop
+                // set a flag to signal the parameter subscription thread that we are done and it can stop
                 ApplicationManager.getInstance().setDataFetchingComplete(threadId, true);
                 
                 // close the writer when we are finished 

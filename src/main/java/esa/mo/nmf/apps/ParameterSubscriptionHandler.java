@@ -3,16 +3,16 @@ package esa.mo.nmf.apps;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DataPollingThreadHandler {
+public class ParameterSubscriptionHandler {
 
-    private static final Logger LOGGER = Logger.getLogger(DataPollingThreadHandler.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ParameterSubscriptionHandler.class.getName());
     
     /**
      * M&C interface of the application.
      */
-    private final DataPollingAppMCAdapter adapter;
+    private final AppMCAdapter adapter;
     
-    public DataPollingThreadHandler(DataPollingAppMCAdapter adapter) {
+    public ParameterSubscriptionHandler(AppMCAdapter adapter) {
         this.adapter = adapter;
     }
     
@@ -22,7 +22,7 @@ public class DataPollingThreadHandler {
      *
      * @return null if it was successful. If not null, then the returned value holds the error number
      */
-    public void startDataPollingThreads() throws Exception {
+    public void startParameterSubscriptionThreads() throws Exception {
         LOGGER.log(Level.INFO, "Starting data polling threads...");
       
         // get numbers of apps to simulate
@@ -37,12 +37,12 @@ public class DataPollingThreadHandler {
             int interval = PropertiesManager.getInstance().getThreadInterval(threadId);
               
             // start app simulation
-            DataPollingThread appThread = new DataPollingThread(this.adapter, threadId, iterations, interval);
+            ParameterSubscriptionThread appThread = new ParameterSubscriptionThread(this.adapter, threadId, iterations, interval);
             appThread.start();
         }
     }
     
-    public void stopDataPollingThreads() {
+    public void stopParameterSubscriptionThreads() {
         ApplicationManager.getInstance().setDataPollingThreadsKeepAlive(false);
     }
 }

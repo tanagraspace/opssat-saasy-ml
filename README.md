@@ -1,5 +1,5 @@
-# OPS-SAT Datapool Polling App
-An NMF App to poll for OBSW datapool parameters.
+# OPS-SAT Datapool Parameter Dispatcher App
+An NMF App that fetches parameters from the OBSWM datapool and writes them to CSV files.
 
 ## Installing
 
@@ -21,11 +21,11 @@ OS name: "windows 10", version: "10.0", arch: "amd64", family: "windows"
 
 2. Get and build the application
 ```
-$ git clone https://github.com/georgeslabreche/opssat-datapool-polling
+$ git clone https://github.com/georgeslabreche/opssat-datapool-param-dispatcher
 $ mvn install
 ```
 
-3. Deploy the application in the NMF SDK following [the NMF deployment guide](https://nanosat-mo-framework.readthedocs.io/en/latest/apps/packaging.html). Replacing instances of "sobel" by "data-polling" and "Sobel" by "DataPollingApp" in the main class name.
+3. Deploy the application in the NMF SDK following [the NMF deployment guide](https://nanosat-mo-framework.readthedocs.io/en/latest/apps/packaging.html). Replacing instances of "sobel" by "datapool-param-dispatcher" and "Sobel" by "DatapoolParameterDispatcherApp" in the main class name.
 
 ## Starting
 Follow [the last 3 steps of the NMF SDK guide](https://nanosat-mo-framework.readthedocs.io/en/latest/sdk.html#running-the-cubesat-simulator). 

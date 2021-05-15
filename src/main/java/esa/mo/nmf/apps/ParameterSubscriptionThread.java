@@ -7,9 +7,9 @@ import java.util.logging.Logger;
 import esa.mo.nmf.apps.DatapoolXmlManager.DatapoolParamTypes;
 
 
-public class DataPollingThread extends Thread {
+public class ParameterSubscriptionThread extends Thread {
     
-    private static final Logger LOGGER = Logger.getLogger(DataPollingThread.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ParameterSubscriptionThread.class.getName());
     
     // log prefix
     private String logPrefix;
@@ -20,13 +20,13 @@ public class DataPollingThread extends Thread {
     // parameter names
     List<String> paramNames;
     
-    private DataPollingAggregationHandler dataPollingAggregationHandler;
+    private AggregationHandler aggregationHandler;
     
     /**
      * Make default constructor inaccessible.
      */
     @SuppressWarnings("unused")
-    private DataPollingThread(){}
+    private ParameterSubscriptionThread(){}
     
     /**
      * 
@@ -34,9 +34,8 @@ public class DataPollingThread extends Thread {
      * @param id the id of the app simulation
      * @param iterations the number of run loop iterations in the app simulation
      * @param interval the interval between each loop iteration in the app simulation (in milliseconds)
-     * @param paramsToGet
      */
-    DataPollingThread(DataPollingAppMCAdapter adapter, int id, int iterations, int interval) throws Exception{
+    ParameterSubscriptionThread(AppMCAdapter adapter, int id, int iterations, int interval) throws Exception{
         this.id = id;
 
         // interval in seconds
@@ -59,17 +58,17 @@ public class DataPollingThread extends Thread {
         ApplicationManager.getInstance().setParamNames(id, this.paramNames);
         
         // instanciate the aggregation handler
-        this.dataPollingAggregationHandler = new DataPollingAggregationHandler(adapter, id, intervalsInSeconds, this.paramNames);
+        this.aggregationHandler = new AggregationHandler(adapter, id, intervalsInSeconds, this.paramNames);
     }
 
     @Override
     public void run() { 
         try {
             // log start of simulation app
-            LOGGER.log(Level.INFO, this.logPrefix + "Starting app to fetch: " + String.join(", ", this.paramNames));
+            LOGGER.log(Level.INFO, this.logPrefix + "Starting thread to fetch: " + String.join(", ", this.paramNames));
             
             // subscribe to parameter data provisioning service
-            this.dataPollingAggregationHandler.toggleSupervisorParametersSubscription(true);
+            this.aggregationHandler.toggleSupervisorParametersSubscription(true);
 
             // break out of the thread loop with iteration is complete 
             while(!ApplicationManager.getInstance().isDataFetchingComplete(this.id)){
@@ -86,7 +85,7 @@ public class DataPollingThread extends Thread {
             }
             
             // unsubscribe to parameter data provisioning service
-            this.dataPollingAggregationHandler.toggleSupervisorParametersSubscription(false);
+            this.aggregationHandler.toggleSupervisorParametersSubscription(false);
  
         } catch(Exception e) {
             LOGGER.log(Level.SEVERE, this.logPrefix + e.getMessage(), e);

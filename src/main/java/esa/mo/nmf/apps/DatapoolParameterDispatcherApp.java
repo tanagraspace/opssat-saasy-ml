@@ -6,22 +6,22 @@ import esa.mo.nmf.nanosatmoconnector.NanoSatMOConnectorImpl;
 import esa.mo.nmf.spacemoadapter.SpaceMOApdapterImpl;
 
 /**
- * Datapool Polling App
+ * Datapool Polling DatapoolParameterDispatcherApp
  * 
  * @author Georges Labreche
  */
-public final class DataPollingApp{
-    private static final Logger LOGGER = Logger.getLogger(DataPollingApp.class.getName());
+public final class DatapoolParameterDispatcherApp{
+    private static final Logger LOGGER = Logger.getLogger(DatapoolParameterDispatcherApp.class.getName());
     
     // app Monitor and Control (M&C) Adapter
-    private DataPollingAppMCAdapter adapter;
+    private AppMCAdapter adapter;
     
-    private DataPollingApp() throws Exception{
+    private DatapoolParameterDispatcherApp() throws Exception{
         
         
         
         // initialize M&C interface
-        adapter = new DataPollingAppMCAdapter();
+        adapter = new AppMCAdapter();
 
         // initialize application's NMF provider
         NanoSatMOConnectorImpl connector = new NanoSatMOConnectorImpl();
@@ -37,7 +37,7 @@ public final class DataPollingApp{
         
         adapter.getSupervisorSMA().addDataReceivedListener(new AggregationWriter());
 
-        LOGGER.log(Level.INFO, "Datapool Polling App initialized.");
+        LOGGER.log(Level.INFO, "Datapool Polling DatapoolParameterDispatcherApp initialized.");
     }
     
     /**
@@ -45,10 +45,10 @@ public final class DataPollingApp{
      */
     public void start() throws Exception{
         // logging
-        LOGGER.log(Level.INFO, "Starting the Datapool Polling App.");
+        LOGGER.log(Level.INFO, "Starting the Datapool Polling DatapoolParameterDispatcherApp.");
         
         // start simulation
-        adapter.startDataPolling();
+        adapter.startFetchingParameters();
     }
     
     
@@ -61,7 +61,7 @@ public final class DataPollingApp{
     public static void main(final String args[]) throws Exception {
         try{
             // create and start the app
-            DataPollingApp app = new DataPollingApp();
+            DatapoolParameterDispatcherApp app = new DatapoolParameterDispatcherApp();
             app.start();
         }
         catch (Exception e){

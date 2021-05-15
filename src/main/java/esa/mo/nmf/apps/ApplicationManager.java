@@ -13,10 +13,10 @@ public class ApplicationManager {
     // flag indicating if all threads should be stopped
     private boolean dataPollingThreadsKeepAlive;
     
-    // parameter names to fetch for each aggregation thread
+    // parameter names to fetch for each aggregation
     private Map<String, List<String>> paramNamesMap;
     
-    // track if we are finished fetching data or not for each aggregation thread
+    // track if we are finished fetching data or not for each aggregation
     private Map<String, Boolean> dataFetchingCompleteMap;
 
     // hide the constructor

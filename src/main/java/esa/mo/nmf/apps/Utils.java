@@ -2,11 +2,11 @@ package esa.mo.nmf.apps;
 
 public final class Utils {
     public static String generateAggregationId(int threadId) {
-        return "Exp" + Constants.EXPERIMENT_ID + "_AggThread_" + threadId;
+        return "Exp" + Constants.EXPERIMENT_ID + "_Agg_" + threadId;
     }
     
     public static String generateAggregationDescription(int threadId) {
-        return "Exp" + Constants.EXPERIMENT_ID  + " Aggregation Thread #" + threadId;
+        return "Exp" + Constants.EXPERIMENT_ID  + " Aggregation #" + threadId;
     }
     
     public static int getThreadIdFromAggId(String aggId) {

@@ -1,6 +1,6 @@
 :: Set variables
-SET APP_NAME_SLUG=datapool-polling
-SET PROJECT_DIR=C:\Users\Georges\Development\ESA\opssat\opssat-datapool-polling
+SET APP_NAME_SLUG=datapool-param-dispatcher
+SET PROJECT_DIR=C:\Users\Georges\Development\ESA\opssat\opssat-datapool-param-dispatcher
 SET NMF_SDK_PACKAGE_DIR=C:\Users\Georges\Development\ESA\opssat\nanosat-mo-framework\sdk\sdk-package
 
 :: Set run flag variable in case we want to build and run

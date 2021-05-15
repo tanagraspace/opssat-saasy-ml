@@ -27,14 +27,14 @@ import org.ccsds.moims.mo.mc.structures.ObjectInstancePairList;
 import esa.mo.nmf.apps.exceptions.AddAggregationDidNotReturnAggregationId;
 
 
-public class DataPollingAggregationHandler {
-    private static final Logger LOGGER = Logger.getLogger(DataPollingAggregationHandler.class.getName());
+public class AggregationHandler {
+    private static final Logger LOGGER = Logger.getLogger(AggregationHandler.class.getName());
     
     // parameters default value before first acquisition
     public static final String PARAMS_DEFAULT_VALUE = "null";
     
     // M&C interface of the application
-    private final DataPollingAppMCAdapter adapter;
+    private final AppMCAdapter adapter;
     
     // aggregation Id string
     private String aggIdStr;
@@ -61,7 +61,7 @@ public class DataPollingAggregationHandler {
      * @param paramSamplingInterval sampling interval in seconds
      * @param parametersNames names of datapool parameters to sample
      */
-    public DataPollingAggregationHandler(DataPollingAppMCAdapter adapter, int threadId, double paramSamplingInterval, List<String> paramNames) throws Exception{
+    public AggregationHandler(AppMCAdapter adapter, int threadId, double paramSamplingInterval, List<String> paramNames) throws Exception{
         this.adapter = adapter;
         this.paramSamplingInterval = paramSamplingInterval;
         this.paramNames = paramNames;

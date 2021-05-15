@@ -8,25 +8,25 @@ import esa.mo.nmf.MonitorAndControlNMFAdapter;
 import esa.mo.nmf.nanosatmoconnector.NanoSatMOConnectorImpl;
 import esa.mo.nmf.spacemoadapter.SpaceMOApdapterImpl;
 
-public class DataPollingAppMCAdapter extends MonitorAndControlNMFAdapter{
+public class AppMCAdapter extends MonitorAndControlNMFAdapter{
     private static final Logger LOGGER = Logger.getLogger(MonitorAndControlNMFAdapter.class.getName());
     
-    private DataPollingThreadHandler dataPollingThreadHandler;
+    private ParameterSubscriptionHandler parameterSubscriptionHandler;
     
-    public DataPollingAppMCAdapter() {
-        this.dataPollingThreadHandler = new DataPollingThreadHandler(this);
+    public AppMCAdapter() {
+        this.parameterSubscriptionHandler = new ParameterSubscriptionHandler(this);
     }
     
-    public DataPollingThreadHandler getDataHandler() {
-        return dataPollingThreadHandler;
+    public ParameterSubscriptionHandler getParameterSubscriptionHandler() {
+        return parameterSubscriptionHandler;
     }
     
-    public void startDataPolling() throws Exception{
-        dataPollingThreadHandler.startDataPollingThreads();
+    public void startFetchingParameters() throws Exception{
+        parameterSubscriptionHandler.startParameterSubscriptionThreads();
     }
 
-    public void stopDataPolling() throws Exception{
-        dataPollingThreadHandler.stopDataPollingThreads();
+    public void stopFetchingParameters() throws Exception{
+        parameterSubscriptionHandler.stopParameterSubscriptionThreads();
     }
 
     //----------------------------------- NMF components --------------------------------------------
@@ -62,7 +62,7 @@ public class DataPollingAppMCAdapter extends MonitorAndControlNMFAdapter{
          this.connector.setCloseAppListener(new CloseAppListener() {
              @Override
              public Boolean onClose() {
-                 return DataPollingAppMCAdapter.this.onClose(true);
+                 return AppMCAdapter.this.onClose(true);
              }
         });
     }
@@ -74,22 +74,28 @@ public class DataPollingAppMCAdapter extends MonitorAndControlNMFAdapter{
      * @return true in case of success, false otherwise
      */
     public boolean onClose(boolean requestFromUser) {
-        boolean success = true;
         
-        // signal the aggregation threads to exit their loops
-        dataPollingThreadHandler.stopDataPollingThreads();
+        try {
         
-        // close supervisor consumer connections
-        supervisorSMA.closeConnections();
+            // signal the parameter subscription thread to exit their loops
+            parameterSubscriptionHandler.stopParameterSubscriptionThreads();
+            
+            // close supervisor consumer connections
+            supervisorSMA.closeConnections();
+            
+            LOGGER.log(Level.INFO, "Closed application successfully.");
+            
+            // if experiment is over
+            if(!requestFromUser) {
+                System.exit(0);
+            }
         
-        LOGGER.log(Level.INFO, "Closed application successfully: " + success);
-        
-        // if experiment is over
-        if(!requestFromUser) {
-            System.exit(success ? 0 : 1);
+        }catch(Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to close application successfully.", e);
+            return false;
         }
         
-        return success;
+        return true;
     }
     
     
