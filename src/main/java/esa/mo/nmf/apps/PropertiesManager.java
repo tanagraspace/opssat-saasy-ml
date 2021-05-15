@@ -3,6 +3,8 @@ package esa.mo.nmf.apps;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,28 +18,31 @@ public class PropertiesManager {
     // prefix on property keys
     public static final String PROPS_PREFIX = "";
     
-    // number of threads to spawn
-    public static final String PROPS_THREADS = PROPS_PREFIX + "threads";
+    // number of aggregations to spawn
+    public static final String PROPS_AGGREGATIONS = PROPS_PREFIX + "aggregations";
     
     // flush data to file for this batch size of fetched data
     public static final String PROPS_FLUSH_WRITE_AT = PROPS_PREFIX + "flush.write.at";
     
-    // number of loop iterations for a simulated app
-    public static final String PROPS_THREAD_ITERATIONS = PROPS_PREFIX + "iterations";
+    // number of loop iterations for an aggregation
+    public static final String PROPS_AGGREGATION_ITERATIONS = PROPS_PREFIX + "iterations";
     
     // loop iteration intervals in milliseconds
-    public static final String PROPS_THREAD_INTERVAL = PROPS_PREFIX + "interval";
+    public static final String PROPS_AGGREGATION_INTERVAL = PROPS_PREFIX + "interval";
+    
+    // predefined list of aggregations to fetch
+    public static final String PROPS_AGGREGATION_PARAMS_GET_NAMES = PROPS_PREFIX + "params.get.names";
     
     // number of datapool parameters to get
-    public static final String PROPS_THREAD_PARAMS_GET_COUNT = PROPS_PREFIX + "params.get.count";
+    public static final String PROPS_AGGREGATION_PARAMS_GET_COUNT = PROPS_PREFIX + "params.get.count";
     
     // the type of parameters to get
-    public static final String PROPS_THREAD_PARAMS_GET_TYPE = PROPS_PREFIX + "params.get.type";
+    public static final String PROPS_AGGREGATION_PARAMS_GET_TYPE = PROPS_PREFIX + "params.get.type";
     
     // number of datapool parameters to set
-    public static final String PROPS_THREAD_PARAMS_SET_COUNT = PROPS_PREFIX + "params.set.count";
+    public static final String PROPS_AGGREGATION_PARAMS_SET_COUNT = PROPS_PREFIX + "params.set.count";
     
-    public static final String PROPS_CSV_OUTPUT_FILEPATH = PROPS_PREFIX + "params.get.output.csv";
+    public static final String PROPS_AGGREGATION_CSV_OUTPUT_FILEPATH = PROPS_PREFIX + "params.get.output.csv";
     
     // configuration properties holder
     private Properties properties;
@@ -80,7 +85,7 @@ public class PropertiesManager {
 
         LOGGER.log(Level.INFO, String.format("Loaded configuration properties from file %s", PROPERTIES_FILE_PATH));
     }
-
+    
     /**
      * Searches for the property with the specified key in the application's properties.
      *
@@ -96,46 +101,60 @@ public class PropertiesManager {
         return property;
     }
     
-    public int getThreadCount() {
-        return Integer.parseInt(getProperty(PROPS_THREADS));
+    public int getAggregationCount() {
+        return Integer.parseInt(getProperty(PROPS_AGGREGATIONS));
     }
     
     public int getFlushWriteAt() {
         return Integer.parseInt(getProperty(PROPS_FLUSH_WRITE_AT));
     }
     
+    public boolean isAggregationParamsGetNamesPredefined(int threadId) {
+        String key = PROPS_AGGREGATION_PARAMS_GET_NAMES + "." + threadId;
+        return this.properties.containsKey(key);
+    }
+    
     /**
-     * Get property for a thread with the given id.
+     * Get property for an aggregation with the given id.
      * @param threadId
      * @param key
      * @return
      */
-    public String getThreadProperty(int threadId, String key) {
+    public String getAggregationProperty(int threadId, String key) {
         String appPropKey = key + "." + threadId;
         return getProperty(appPropKey);
     }
     
-    public int getThreadIterations(int threadId) {
-        return Integer.parseInt(getThreadProperty(threadId, PROPS_THREAD_ITERATIONS));
+    public int getAggregationIterations(int threadId) {
+        return Integer.parseInt(getAggregationProperty(threadId, PROPS_AGGREGATION_ITERATIONS));
     }
     
-    public int getThreadInterval(int threadId) {
-        return Integer.parseInt(getThreadProperty(threadId, PROPS_THREAD_INTERVAL));
+    public int getAggregationInterval(int threadId) {
+        return Integer.parseInt(getAggregationProperty(threadId, PROPS_AGGREGATION_INTERVAL));
     }
     
-    public int getThreadParamsGetCount(int threadId) {
-        return Integer.parseInt(getThreadProperty(threadId, PROPS_THREAD_PARAMS_GET_COUNT));
+    public List<String> getAggregationParamsGetNames(int threadId) {
+        String paramNames = getAggregationProperty(threadId, PROPS_AGGREGATION_PARAMS_GET_NAMES);
+        if(paramNames != null) {
+            return Arrays.asList(paramNames.split(","));
+        }else {
+            return null;
+        }
     }
     
-    public String getThreadParamsGetType(int threadId) {
-        return getThreadProperty(threadId, PROPS_THREAD_PARAMS_GET_TYPE);
+    public int getAggregationParamsGetCount(int threadId) {
+        return Integer.parseInt(getAggregationProperty(threadId, PROPS_AGGREGATION_PARAMS_GET_COUNT));
     }
     
-    public String getThreadCsvOutputFilepath(int threadId) {
-        return getThreadProperty(threadId, PROPS_CSV_OUTPUT_FILEPATH);
+    public String getAggregationParamsGetType(int threadId) {
+        return getAggregationProperty(threadId, PROPS_AGGREGATION_PARAMS_GET_TYPE);
     }
     
-    public int getThreadParamsSetCount(int threadId) {
-        return Integer.parseInt(getThreadProperty(threadId, PROPS_THREAD_PARAMS_SET_COUNT));
+    public String getAggregationCsvOutputFilepath(int threadId) {
+        return getAggregationProperty(threadId, PROPS_AGGREGATION_CSV_OUTPUT_FILEPATH);
+    }
+    
+    public int getAggregationParamsSetCount(int threadId) {
+        return Integer.parseInt(getAggregationProperty(threadId, PROPS_AGGREGATION_PARAMS_SET_COUNT));
     }
 }

@@ -41,7 +41,7 @@ public class AggregationWriter implements CompleteAggregationReceivedListener {
         this.iterationTrackerMap = new HashMap<String, Integer>();
         
         // get the thread count
-        int threadCount = PropertiesManager.getInstance().getThreadCount();
+        int threadCount = PropertiesManager.getInstance().getAggregationCount();
         
         
         // initialize some stuff for each aggregation
@@ -57,7 +57,7 @@ public class AggregationWriter implements CompleteAggregationReceivedListener {
             this.iterationTrackerMap.put(aggId, 0);
             
             // the path of the CSV file
-            String csvOuptutFilepath = PropertiesManager.getInstance().getThreadCsvOutputFilepath(threadId);
+            String csvOuptutFilepath = PropertiesManager.getInstance().getAggregationCsvOutputFilepath(threadId);
             
             // get file's parent directory path
             Path csvOuptutFileDirPath = Paths.get(csvOuptutFilepath).getParent();
@@ -73,12 +73,10 @@ public class AggregationWriter implements CompleteAggregationReceivedListener {
                 if (!csvOuptutDirFile.exists()) {
                     if (!csvOuptutDirFile.mkdirs()) {
                         LOGGER.log(Level.SEVERE,
-                            String.format("[WHAAAAAAAAAAAT] Couldn't create directories for file path %s", csvOuptutDirFile.getPath()));
+                            String.format("Couldn't create directories for file path %s", csvOuptutDirFile.getPath()));
                     }else {
-                        LOGGER.log(Level.INFO, "[WHAAAAAAAAAAAT] Created directories for file path %s", csvOuptutDirFile.getPath());
+                        LOGGER.log(Level.INFO, "Created directories for file path %s", csvOuptutDirFile.getPath());
                     }
-                }else {
-                    System.out.println("WHAT HWTH WHAAAAAAAAAAAT EXISTS!");
                 }
             }
             
@@ -124,7 +122,7 @@ public class AggregationWriter implements CompleteAggregationReceivedListener {
             }
             
             // check if we are finished fetching param values for the aggregation
-            if(iterCounter >= PropertiesManager.getInstance().getThreadIterations(threadId)) {
+            if(iterCounter >= PropertiesManager.getInstance().getAggregationIterations(threadId)) {
                 // set a flag to signal the parameter subscription thread that we are done and it can stop
                 ApplicationManager.getInstance().setDataFetchingComplete(threadId, true);
                 

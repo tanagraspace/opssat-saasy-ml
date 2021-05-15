@@ -39,22 +39,31 @@ public class ParameterSubscriptionThread extends Thread {
         this.id = id;
 
         // interval in seconds
-        double intervalsInSeconds = interval / 1000;
+        double intervalsInSeconds = interval / 1000.0;
         
         // log message prefix
         this.logPrefix = Utils.generateLogPrefix(id);
+
+        // define the list of param names that will be fetched
+        if(PropertiesManager.getInstance().isAggregationParamsGetNamesPredefined(id)) {
+            // param names have been predefined in the config.properties file as a comma separated list of param names
+            this.paramNames = PropertiesManager.getInstance().getAggregationParamsGetNames(id);
+            
+        }else {
+            // param names are fetched from the datapool.xml file
+            
+            // get the data type of the parameters that we want to fetch
+            String paramTypeStr =  PropertiesManager.getInstance().getAggregationParamsGetType(id);
+            DatapoolParamTypes paramType = DatapoolXmlManager.getinstance().getDatapoolParamTypeFromString(paramTypeStr);
+            
+            // get how many parameters to fetch
+            int paramGetCount = PropertiesManager.getInstance().getAggregationParamsGetCount(id);
+            
+            // get the param names from the datapool.xml file
+            this.paramNames = DatapoolXmlManager.getinstance().getParamNames(paramGetCount, paramType);
+        }
         
-        // fetch the parameter types
-        String paramTypeStr =  PropertiesManager.getInstance().getThreadParamsGetType(id);
-        DatapoolParamTypes paramType = DatapoolXmlManager.getinstance().getDatapoolParamTypeFromString(paramTypeStr);
-        
-        // fetch how many parameters to get
-        int paramGetCount = PropertiesManager.getInstance().getThreadParamsGetCount(id);
-        
-        // param names to be fetched by the app simulation
-        this.paramNames = DatapoolXmlManager.getinstance().getParamNames(paramGetCount, paramType);
-        
-        // set the param names for this thread in the application manager so that they can be accessed from the AggregationWriteer
+        // set the param name list in the application manager so that it can be later accessed from within the AggregationWriter
         ApplicationManager.getInstance().setParamNames(id, this.paramNames);
         
         // instanciate the aggregation handler
@@ -64,13 +73,13 @@ public class ParameterSubscriptionThread extends Thread {
     @Override
     public void run() { 
         try {
-            // log start of simulation app
-            LOGGER.log(Level.INFO, this.logPrefix + "Starting thread to fetch: " + String.join(", ", this.paramNames));
+            // log start of the thread
+            LOGGER.log(Level.INFO, this.logPrefix + "Starting thread to fetch params: " + String.join(", ", this.paramNames));
             
             // subscribe to parameter data provisioning service
             this.aggregationHandler.toggleSupervisorParametersSubscription(true);
 
-            // break out of the thread loop with iteration is complete 
+            // break out of the thread loop when iteration is complete 
             while(!ApplicationManager.getInstance().isDataFetchingComplete(this.id)){
                 
                 // sleep
@@ -78,10 +87,9 @@ public class ParameterSubscriptionThread extends Thread {
                 
                 // also break out the thread loop if the application stop is triggered by the user
                 if(!ApplicationManager.getInstance().isDataPollingThreadsKeepAlive()) {
-                    // FIXME: flush print writer data that has not been written and close the print writer
+                    // FIXME: flush print writer data that has not been written and close the print writer?
                     break;
                 }
-               
             }
             
             // unsubscribe to parameter data provisioning service

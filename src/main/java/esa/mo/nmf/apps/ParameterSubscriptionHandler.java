@@ -23,18 +23,18 @@ public class ParameterSubscriptionHandler {
      * @return null if it was successful. If not null, then the returned value holds the error number
      */
     public void startParameterSubscriptionThreads() throws Exception {
-        LOGGER.log(Level.INFO, "Starting data polling threads...");
+        LOGGER.log(Level.INFO, "Starting parameter subscription threads.");
       
         // get numbers of apps to simulate
-        String appCountStr = PropertiesManager.getInstance().getProperty(PropertiesManager.PROPS_THREADS);
+        String appCountStr = PropertiesManager.getInstance().getProperty(PropertiesManager.PROPS_AGGREGATIONS);
         int appCount = Integer.parseInt(appCountStr);
         
         // instanciate app simulations as threads
         for(int threadId = 1; threadId <= appCount; threadId++) {
             
             // fetch app simulation iterations and interval
-            int iterations = PropertiesManager.getInstance().getThreadIterations(threadId);
-            int interval = PropertiesManager.getInstance().getThreadInterval(threadId);
+            int iterations = PropertiesManager.getInstance().getAggregationIterations(threadId);
+            int interval = PropertiesManager.getInstance().getAggregationInterval(threadId);
               
             // start app simulation
             ParameterSubscriptionThread appThread = new ParameterSubscriptionThread(this.adapter, threadId, iterations, interval);
