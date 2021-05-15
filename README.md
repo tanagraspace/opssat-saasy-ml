@@ -1,5 +1,5 @@
 # OPS-SAT Datapool Parameter Dispatcher App
-An NMF App that fetches parameters from the OBSW datapool and writes their values to CSV files.
+An NMF App for the OPS-SAT spacecraft. The app fetches parameters from the spacecraft's OBSW datapool and writes their values into CSV files.
 
 ## Installing
 
