@@ -36,13 +36,18 @@ public class PropertiesManager {
     // number of datapool parameters to get
     public static final String PROPS_AGGREGATION_PARAMS_GET_COUNT = PROPS_PREFIX + "params.get.count";
     
-    // the type of parameters to get
+    // type of parameters to get
     public static final String PROPS_AGGREGATION_PARAMS_GET_TYPE = PROPS_PREFIX + "params.get.type";
+    
+    // path to the CSV file to write values to
+    public static final String PROPS_AGGREGATION_CSV_OUTPUT_FILEPATH = PROPS_PREFIX + "params.get.output.csv";
+    
+    // flag indicating whether or not fetched values should be appended to existing CSV file or not
+    // if set to false then CSV file will be overwritten if it already exists
+    public static final String PROPS_AGGREGATION_CSV_OUTPUT_APPEND = PROPS_PREFIX + "params.get.output.csv.append";
     
     // number of datapool parameters to set
     public static final String PROPS_AGGREGATION_PARAMS_SET_COUNT = PROPS_PREFIX + "params.set.count";
-    
-    public static final String PROPS_AGGREGATION_CSV_OUTPUT_FILEPATH = PROPS_PREFIX + "params.get.output.csv";
     
     // configuration properties holder
     private Properties properties;
@@ -152,6 +157,10 @@ public class PropertiesManager {
     
     public String getAggregationCsvOutputFilepath(int threadId) {
         return getAggregationProperty(threadId, PROPS_AGGREGATION_CSV_OUTPUT_FILEPATH);
+    }
+    
+    public boolean isAggregationCsvOutputAppend(int threadId) {
+        return Boolean.parseBoolean(getAggregationProperty(threadId, PROPS_AGGREGATION_CSV_OUTPUT_APPEND));
     }
     
     public int getAggregationParamsSetCount(int threadId) {
