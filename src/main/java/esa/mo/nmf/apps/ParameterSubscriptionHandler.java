@@ -39,6 +39,9 @@ public class ParameterSubscriptionHandler {
             // start app simulation
             ParameterSubscriptionThread appThread = new ParameterSubscriptionThread(this.adapter, threadId, iterations, interval);
             appThread.start();
+            
+            // workaround to prevent threads being locked in the Supervisor's Thread Pool (max Threads is hardcoded to 5)
+            Thread.sleep(500);
         }
     }
     
