@@ -1,4 +1,4 @@
-# OPS-SAT Datapool Parameter Dispatcher App
+# OPS-SAT SaaSyML App
 An NMF App for the OPS-SAT spacecraft. The app uses ML to train AI models with the spacecraft's OBSW datapool parameters as training data. 
 
 ## Installing
@@ -34,7 +34,6 @@ OS name: "linux", version: "5.10.16.3-microsoft-standard-wsl2", arch: "amd64", f
 ```shell
 $ git clone https://github.com/tanagraspace/opssat-saasy-ml-nmf.git
 $ cd opssat-saasy-ml-nmf
-$ git checkout saasy-ml
 $ mvn install
 $ cd ..
 ```
@@ -43,7 +42,6 @@ $ cd ..
 ```shell
 $ git clone https://github.com/tanagraspace/opssat-saasy-ml
 $ cd opssat-saasy-ml
-$ git checkout dev
 $ mvn install
 $ cd ..
 ```
