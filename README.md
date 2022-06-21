@@ -1,13 +1,17 @@
 # OPS-SAT Datapool Parameter Dispatcher App
-An NMF App for the OPS-SAT spacecraft. The app fetches parameters from the spacecraft's OBSW datapool and writes their values into CSV files.
+An NMF App for the OPS-SAT spacecraft. The app uses ML to train AI models with the spacecraft's OBSW datapool parameters as training data. 
 
 ## Installing
+
+References:
+- [the NMF quick start guide](https://nanosat-mo-framework.readthedocs.io/en/latest/quickstart.html)
+- [the NMF deployment guide](https://nanosat-mo-framework.readthedocs.io/en/latest/apps/packaging.html)
 
 ### Requirements
 - Java 8
 - Maven 3.X.X
 
-Tested environment:
+Tested environment on Windows 10:
 ```powershell
 Apache Maven 3.8.1 (05c21c65bdfed0f71a2f2ada8b84da59348c4c5d)
 Maven home: C:\Users\Georges\Development\Tools\apache-maven-3.8.1\bin\..
@@ -16,20 +20,67 @@ Default locale: en_US, platform encoding: Cp1252
 OS name: "windows 10", version: "10.0", arch: "amd64", family: "windows"
 ```
 
-### Steps
-1. Install the `dev` branch of NanoSatMO Framework (NMF) following [the NMF quick start guide](https://nanosat-mo-framework.readthedocs.io/en/latest/quickstart.html)
-
-2. Get and build
+Tested environment on Ubuntu 18.04.5 on Windows:
+```shell
+Apache Maven 3.8.4 (9b656c72d54e5bacbed989b64718c159fe39b537)
+Maven home: /mnt/c/Users/honeycrisp/Tools/apache-maven-3.8.4
+Java version: 1.8.0_312, vendor: Private Build, runtime: /usr/lib/jvm/java-8-openjdk-amd64/jre
+Default locale: en, platform encoding: UTF-8
+OS name: "linux", version: "5.10.16.3-microsoft-standard-wsl2", arch: "amd64", family: "unix"
 ```
-$ git clone https://github.com/georgeslabreche/opssat-datapool-param-dispatcher
+
+### Steps
+#### 1. Install NMF
+```shell
+$ git clone https://github.com/tanagraspace/opssat-saasy-ml-nmf.git
+$ cd opssat-saasy-ml-nmf
+$ git checkout saasy-ml
+$ mvn install
+$ cd ..
+```
+
+#### 2. Install the SaaSyML App
+```shell
+$ git clone https://github.com/tanagraspace/opssat-saasy-ml
+$ cd opssat-saasy-ml
+$ git checkout dev
+$ mvn install
+$ cd ..
+```
+
+#### 3. Deploy the SaaSyML App
+```shell
+$ cd opssat-saasy-ml-nmf/sdk/sdk-package/
 $ mvn install
 ```
 
-3. Deploy the application in the NMF SDK following [the NMF deployment guide](https://nanosat-mo-framework.readthedocs.io/en/latest/apps/packaging.html). Replacing instances of "sobel" by "datapool-param-dispatcher" and "Sobel" by "DatapoolParameterDispatcherApp" in the main class name.
+#### 4. Supervisor and CTT
+Open a second terminal window to run both the Supervisor and the Consumer Test Tool (CTT).
 
-## Starting
+The Supervisor:
+```shell
+cd target/nmf-sdk-2.1.0-SNAPSHOT/home/nmf/nanosat-mo-supervisor-sim
+./nanosat-mo-supervisor-sim.sh 
+```
 
-### Configuring
+- The Supervisor outputs a URI on the console.
+- This URI follows the pattern maltcp://SOME_ADDRESS:PORT/nanosat-mo-supervisor-Directory.
+
+The CTT:
+```shell
+cd target/nmf-sdk-2.1.0-SNAPSHOT/home/nmf/consumer-test-tool
+./consumer-test-tool.sh
+```
+
+#### 5. Start the SaaSyML App
+- Paste the URI given byt the Supervisor into the field in the Communication Settings tab of the CTT.
+- Click the button Fetch information.
+- In the Providers List, the supervisor should show up. 
+- The table on the right side should list some services. 
+- Click the button Connect to Selected Provider which triggers a new tab to appear next to the Communication Settings. 
+- You now have a working connection to the supervisor and are able to start apps and check messages.
+
+## Configuration
 
 The app is configured via the `config.properties` file. Number of aggregations to build and the row write frequency in which the fetched values are written to the output CSV files:
 ```
@@ -57,9 +108,3 @@ params.get.names.2=GNC_0005,GNC_0011,GNC_0007
 params.get.output.csv.2=toGround/thread_02.csv
 params.get.output.csv.append.2=true
 ```
-
-### Running
-Follow [the last 3 steps of the NMF SDK guide](https://nanosat-mo-framework.readthedocs.io/en/latest/sdk.html#running-the-cubesat-simulator). 
-
-Alternatively, use the `build.bat` script after editing the `PROJECT_DIR` and `NMF_SDK_PACKAGE_DIR` to match your development environment's file system. Running `build.bat` builds the project. Running `build.bat 1` builds and runs the project. 
-
