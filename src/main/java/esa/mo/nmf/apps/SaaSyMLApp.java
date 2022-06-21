@@ -10,13 +10,13 @@ import esa.mo.nmf.spacemoadapter.SpaceMOApdapterImpl;
  * 
  * @author Georges Labreche
  */
-public final class DatapoolParameterDispatcherApp{
-    private static final Logger LOGGER = Logger.getLogger(DatapoolParameterDispatcherApp.class.getName());
+public final class SaaSyMLApp{
+    private static final Logger LOGGER = Logger.getLogger(SaaSyMLApp.class.getName());
     
     // app Monitor and Control (M&C) Adapter
     private AppMCAdapter adapter;
     
-    private DatapoolParameterDispatcherApp() throws Exception{
+    private SaaSyMLApp() throws Exception{
         
         // initialize M&C interface
         adapter = new AppMCAdapter();
@@ -59,7 +59,7 @@ public final class DatapoolParameterDispatcherApp{
     public static void main(final String args[]) throws Exception {
         try{
             // create and start the app
-            DatapoolParameterDispatcherApp app = new DatapoolParameterDispatcherApp();
+            SaaSyMLApp app = new SaaSyMLApp();
             app.start();
         }
         catch (Exception e){
