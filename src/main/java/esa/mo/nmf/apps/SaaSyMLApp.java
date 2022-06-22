@@ -5,12 +5,14 @@ import java.util.logging.Logger;
 import esa.mo.nmf.nanosatmoconnector.NanoSatMOConnectorImpl;
 import esa.mo.nmf.spacemoadapter.SpaceMOApdapterImpl;
 
+import esa.mo.nmf.apps.verticles.MainVerticle;
+
 /**
  * The main App class
  * 
  * @author Georges Labreche
  */
-public final class SaaSyMLApp{
+public final class SaaSyMLApp {
     private static final Logger LOGGER = Logger.getLogger(SaaSyMLApp.class.getName());
     
     // app Monitor and Control (M&C) Adapter
@@ -45,10 +47,14 @@ public final class SaaSyMLApp{
         // logging
         LOGGER.log(Level.INFO, "Starting the app.");
         
-        // start simulation
-        adapter.startFetchingParameters();
+        // start fetching parameters
+        // TODO: make this a vertical?
+        //adapter.startFetchingParameters();
+
+        MainVerticle mv = new MainVerticle();
+        mv.start();
     }
-    
+
     
     /**
      * Main command line entry point.

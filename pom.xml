@@ -31,8 +31,25 @@
     <assembly.mainClass>esa.mo.nmf.apps.SaaSyMLApp</assembly.mainClass>
     <maven.deploy.skip>true</maven.deploy.skip>
     <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+
+    <vertx.version>4.2.7</vertx.version>
+    <!--main.verticle>esa.mo.nmf.apps.verticles.MainVerticle</main.verticle-->
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-stack-depchain</artifactId>
+        <version>${vertx.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
+    <!-- NMF Dependencies -->
     <dependency>
       <groupId>int.esa.nmf.core</groupId>
       <artifactId>nanosat-mo-connector</artifactId>
@@ -41,6 +58,8 @@
       <groupId>int.esa.nmf.core</groupId>
       <artifactId>space-mo-adapter</artifactId>
     </dependency>
+
+    <!-- Commons Dependencies -->
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
@@ -50,6 +69,16 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
       <version>3.12.0</version>
+    </dependency>
+
+    <!-- Vertx Dependencies -->
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-config</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web</artifactId>
     </dependency>
   </dependencies>
   <build>

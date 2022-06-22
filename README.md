@@ -1,11 +1,12 @@
 # OPS-SAT SaaSyML App
 An NMF App for the OPS-SAT spacecraft. The app uses ML to train AI models with the spacecraft's OBSW datapool parameters as training data. 
 
-## Installing
+## References
+- [The NMF quick start guide](https://nanosat-mo-framework.readthedocs.io/en/latest/quickstart.html)
+- [The NMF deployment guide](https://nanosat-mo-framework.readthedocs.io/en/latest/apps/packaging.html)
+- [Vert.x Core Manual](https://vertx.io/docs/vertx-core/java/)
 
-References:
-- [the NMF quick start guide](https://nanosat-mo-framework.readthedocs.io/en/latest/quickstart.html)
-- [the NMF deployment guide](https://nanosat-mo-framework.readthedocs.io/en/latest/apps/packaging.html)
+## Installing
 
 ### Requirements
 - Java 8
@@ -86,7 +87,7 @@ cd target/nmf-sdk-2.1.0-SNAPSHOT/home/nmf/nanosat-mo-supervisor-sim
 ```
 
 - The Supervisor outputs a URI on the console.
-- This URI follows the pattern `maltcp://SOME_ADDRESS:PORT/nanosat-mo-supervisor-Directory`.
+- This URI follows the pattern `maltcp://<SUPERVISOR_HOST>:<SUPERVISOR_PORT>/nanosat-mo-supervisor-Directory`.
 
 The CTT:
 ```shell
@@ -102,34 +103,48 @@ cd target/nmf-sdk-2.1.0-SNAPSHOT/home/nmf/consumer-test-tool
 - Select the **saasy-ml** app under the **Apps Launcher Servce" table.
 - Click the **runApp** button.
 
-## Terminating
-Sometimes the Supervisor or/and the CTT don't shutdown gracefully.
-
-## Configuration
-
-The app is configured via the `config.properties` file. Number of aggregations to build and the row write frequency in which the fetched values are written to the output CSV files:
+#### 6. Make an API request
+Executing the following API request from a Terminal:
 ```
-aggregations=4
-flush.write.at=10
+curl http://<SUPERVISOR_HOST>:9999/api/v1/inference
 ```
 
-Each aggregation is configured to fetch `n` parameters of a certain type for `i` iterations and whether or not the output is appended to an existing CSV file or if a new file is created on each run. For instance, to fetch 15 Float parameters for 5 iterations at intervals of 2 seconds:
-
-```
-iterations.1=5
-interval.1=2000
-params.get.count.1=15
-params.get.type.1=Float
-params.get.output.csv.1=toGround/thread_01.csv
-params.get.output.csv.append.1=false
+Should return a JSON response:
+```json
+{
+  "request" : "inference"
+}
 ```
 
-Parameters can also be explicitly listed:
+## Terminating the App
+Sometimes, the App will not shutdown gracefully despite terminating the Supervisor and the CTT. In this case, attempting to repeat installation step #3 to redeploy the app will result in a locked file error, e.g.:
+```powershell
+ Failed to execute goal org.apache.maven.plugins:maven-dependency-plugin:3.1.0:copy-dependencies (copy-dependencies) on project package: Error copying artifact from C:\Users\honeycrisp\.m2\repository\com\tanagraspace\nmf\apps\saasy-ml\2.1.0-SNAPSHOT\saasy-ml-2.1.0-SNAPSHOT.jar to C:\Users\honeycrisp\Dev\Tanagra\ESA\opssat\saasy-ml\opssat-saasy-ml-nmf\sdk\sdk-package\target\nmf-sdk-2.1.0-SNAPSHOT\home\nmf\lib\saasy-ml-2.1.0-SNAPSHOT.jar: C:\Users\honeycrisp\Dev\Tanagra\ESA\opssat\saasy-ml\opssat-saasy-ml-nmf\sdk\sdk-package\target\nmf-sdk-2.1.0-SNAPSHOT\home\nmf\lib\saasy-ml-2.1.0-SNAPSHOT.jar: The process cannot access the file because it is being used by another process. -> [Help 1]
+```
 
+In this case, use the jps command to identify the process id of the culprit process (i.e. the SaaSyMLApp java process):
+```powershell
+> jps
+55880 org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar
+95404 SaaSyMLApp
+150140 Jps
 ```
-iterations.2=10
-interval.2=1000
-params.get.names.2=GNC_0005,GNC_0011,GNC_0007
-params.get.output.csv.2=toGround/thread_02.csv
-params.get.output.csv.append.2=true
+
+Force kill the process, e.g. in Windows Terminal:
+```powershell
+> taskkill /F /PID 95404
+SUCCESS: The process with PID 95404 has been terminated.
 ```
+
+Check that the process was indeed killed:
+```powershell
+> jps
+111924 Jps
+55880 org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar
+```
+
+Now the App can be redeployed.
+
+## API
+TBD
+
