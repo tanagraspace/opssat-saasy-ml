@@ -30,15 +30,8 @@ OS name: "linux", version: "5.10.16.3-microsoft-standard-wsl2", arch: "amd64", f
 ```
 
 ### Steps
-#### 1. Install NMF
-```shell
-$ git clone https://github.com/tanagraspace/opssat-saasy-ml-nmf.git
-$ cd opssat-saasy-ml-nmf
-$ mvn install
-$ cd ..
-```
 
-#### 2. Install the SaaSyML App
+#### 1. Install the SaaSyML App
 ```shell
 $ git clone https://github.com/tanagraspace/opssat-saasy-ml
 $ cd opssat-saasy-ml
@@ -46,9 +39,16 @@ $ mvn install
 $ cd ..
 ```
 
+#### 2. Install NMF
+```shell
+$ git clone https://github.com/tanagraspace/opssat-saasy-ml-nmf.git
+$ cd opssat-saasy-ml-nmf
+$ mvn install
+```
+
 #### 3. Deploy the SaaSyML App
 ```shell
-$ cd opssat-saasy-ml-nmf/sdk/sdk-package/
+$ cd sdk/sdk-package/
 $ mvn install
 ```
 
@@ -71,12 +71,12 @@ cd target/nmf-sdk-2.1.0-SNAPSHOT/home/nmf/consumer-test-tool
 ```
 
 #### 5. Start the SaaSyML App
-- Paste the URI given byt the Supervisor into the field in the Communication Settings tab of the CTT.
-- Click the button Fetch information.
-- In the Providers List, the supervisor should show up. 
-- The table on the right side should list some services. 
-- Click the button Connect to Selected Provider which triggers a new tab to appear next to the Communication Settings. 
-- You now have a working connection to the supervisor and are able to start apps and check messages.
+- Paste the URI given by the Supervisor into the **Communication Settings** field of the CTT.
+- Click the **Fetch information** button.
+- Click the **Connect to Selected Provider** button.
+- A new tab appears: **nanosat-mo-supervisor**. 
+- Select the **saasy-ml** app under the **Apps Launcher Servce" table.
+- Click the **runApp** button.
 
 ## Configuration
 
