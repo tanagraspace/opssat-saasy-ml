@@ -39,11 +39,35 @@ $ mvn install
 $ cd ..
 ```
 
+
+
 #### 2. Install NMF
 ```shell
 $ git clone https://github.com/tanagraspace/opssat-saasy-ml-nmf.git
 $ cd opssat-saasy-ml-nmf
 $ mvn install
+```
+
+If in step 2 the app was cloned to a different folder name than the default `opssat-saasy-ml`, then the following copy configuration in `sdk/sdk-package/pom.xml` must be updated:
+
+```xml
+<copy todir="${esa.nmf.sdk.assembly.outputdir}/home/saasy-ml">
+    <fileset dir="${basedir}/src/main/resources/space-common"/>
+    <fileset dir="${basedir}/src/main/resources/space-app-root"/>
+    <fileset dir="${basedir}/../../../opssat-saasy-ml/conf"/>
+</copy>
+```
+
+Specifically, the following line:
+
+```xml
+<fileset dir="${basedir}/../../../opssat-saasy-ml/conf"/>
+```
+
+must be update to:
+
+```xml
+<fileset dir="${basedir}/../../../<the_app_folder_name>/conf"/>
 ```
 
 #### 3. Deploy the SaaSyML App
@@ -62,7 +86,7 @@ cd target/nmf-sdk-2.1.0-SNAPSHOT/home/nmf/nanosat-mo-supervisor-sim
 ```
 
 - The Supervisor outputs a URI on the console.
-- This URI follows the pattern maltcp://SOME_ADDRESS:PORT/nanosat-mo-supervisor-Directory.
+- This URI follows the pattern `maltcp://SOME_ADDRESS:PORT/nanosat-mo-supervisor-Directory`.
 
 The CTT:
 ```shell
@@ -77,6 +101,9 @@ cd target/nmf-sdk-2.1.0-SNAPSHOT/home/nmf/consumer-test-tool
 - A new tab appears: **nanosat-mo-supervisor**. 
 - Select the **saasy-ml** app under the **Apps Launcher Servce" table.
 - Click the **runApp** button.
+
+## Terminating
+Sometimes the Supervisor or/and the CTT don't shutdown gracefully.
 
 ## Configuration
 
