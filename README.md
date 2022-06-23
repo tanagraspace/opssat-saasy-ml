@@ -117,7 +117,11 @@ Should return a JSON response:
 ```
 
 ## Terminating the App
-Sometimes, the App will not shutdown gracefully despite terminating the Supervisor and the CTT. In this case, attempting to repeat installation step #3 to redeploy the app will result in a locked file error, e.g.:
+Note: examples in this section are in PowerShell.
+
+Situation: The App did not shutdown gracefully despite terminating the Supervisor and the CTT. 
+Problem: Attempting to repeat installation step #3 to redeploy the app will result in a locked file error, e.g.:
+
 ```powershell
  Failed to execute goal org.apache.maven.plugins:maven-dependency-plugin:3.1.0:copy-dependencies (copy-dependencies) on project package: Error copying artifact from C:\Users\honeycrisp\.m2\repository\com\tanagraspace\nmf\apps\saasy-ml\2.1.0-SNAPSHOT\saasy-ml-2.1.0-SNAPSHOT.jar to C:\Users\honeycrisp\Dev\Tanagra\ESA\opssat\saasy-ml\opssat-saasy-ml-nmf\sdk\sdk-package\target\nmf-sdk-2.1.0-SNAPSHOT\home\nmf\lib\saasy-ml-2.1.0-SNAPSHOT.jar: C:\Users\honeycrisp\Dev\Tanagra\ESA\opssat\saasy-ml\opssat-saasy-ml-nmf\sdk\sdk-package\target\nmf-sdk-2.1.0-SNAPSHOT\home\nmf\lib\saasy-ml-2.1.0-SNAPSHOT.jar: The process cannot access the file because it is being used by another process. -> [Help 1]
 ```

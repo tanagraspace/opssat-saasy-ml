@@ -51,8 +51,10 @@ public final class SaaSyMLApp {
         // TODO: make this a vertical?
         //adapter.startFetchingParameters();
 
+        LOGGER.log(Level.INFO, "Starting the Main Vertical.");
         MainVerticle mv = new MainVerticle();
         mv.start();
+        
     }
 
     
