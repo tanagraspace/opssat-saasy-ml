@@ -33,8 +33,6 @@ public class AggregationHandler {
     // parameters default value before first acquisition
     public static final String PARAMS_DEFAULT_VALUE = "null";
     
-    // M&C interface of the application
-    private final AppMCAdapter adapter;
     
     // aggregation Id string
     private String aggIdStr;
@@ -55,20 +53,18 @@ public class AggregationHandler {
     private String logPrefix;
     
     /**
-     * 
-     * @param adapter the adapter
-     * @param threadId the thread id
+     * @param expId the experiment id
+     * @param datasetId the dataset id
      * @param paramSamplingInterval sampling interval in seconds
      * @param parametersNames names of datapool parameters to sample
      */
-    public AggregationHandler(AppMCAdapter adapter, int threadId, double paramSamplingInterval, List<String> paramNames) throws Exception{
-        this.adapter = adapter;
+    public AggregationHandler(int expId, int datasetId, double paramSamplingInterval, List<String> paramNames) throws Exception {
         this.paramSamplingInterval = paramSamplingInterval;
         this.paramNames = paramNames;
         
-        this.aggIdStr = Utils.generateAggregationId(threadId);
-        this.aggDescription = Utils.generateAggregationDescription(threadId);
-        this.logPrefix = Utils.generateLogPrefix(threadId);
+        this.aggIdStr = Utils.generateAggregationId(expId, datasetId);
+        this.aggDescription = Utils.generateAggregationDescription(expId, datasetId);
+        this.logPrefix = Utils.generateLogPrefix(expId, datasetId);
     }
 
     /**
@@ -84,28 +80,7 @@ public class AggregationHandler {
             disableSupervisorParametersSubscription();
         }
     }
-    
-    
-    public LongList getParamIds() throws Exception{
-        ParameterStub paramStub =
-            adapter.getSupervisorSMA().getMCServices().getParameterService().getParameterStub();
-    
-        // list parameters to fetch and get their IDs from the supervisor
-        IdentifierList paramIdentifierList = new IdentifierList();
-        this.paramNames.stream().forEach(name -> paramIdentifierList.add(new Identifier(name)));
-        
-        // list parameter definition
-        ObjectInstancePairList objInstPairList;
-        objInstPairList = paramStub.listDefinition(paramIdentifierList);
 
-        // build list of param ids
-        LongList paramIds = new LongList();
-        objInstPairList.stream()
-            .forEach(objInstPair -> paramIds.add(objInstPair.getObjIdentityInstanceId()));
-      
-        // return list of param ids
-        return paramIds;
-    }
 
     /**
      * Subscribes to the OBSW parameters values we need by creating and enabling an aggregation in the
@@ -118,7 +93,26 @@ public class AggregationHandler {
         // create (or update) and enable an aggregation for the parameters to fetch
         createOrUpdateAggForParams(paramIds);
   
-        LOGGER.log(Level.INFO, this.logPrefix + "Started fetching parameters from supervisor");
+        LOGGER.log(Level.INFO, this.logPrefix + "Started fetching parameters from supervisor.");
+    }
+
+
+    /**
+     * Stops the subscription to the OBSW parameters values by disabling the generation of the
+     * aggregation we created in the aggregation service of the supervisor.
+     */
+    private void disableSupervisorParametersSubscription() throws Exception{
+        // get aggregation stub
+        AggregationStub aggStub = 
+            AppMCAdapter.getInstance().getSupervisorSMA().getMCServices().getAggregationService().getAggregationStub();
+
+        // disable generation of aggregation
+        InstanceBooleanPairList instBoolPairList = new InstanceBooleanPairList();
+        instBoolPairList.add(new InstanceBooleanPair(this.aggId, false));
+        aggStub.enableGeneration(false, instBoolPairList);
+      
+        // log
+        LOGGER.log(Level.INFO, this.logPrefix + "Stopped fetching parameters from supervisor.");
     }
     
 
@@ -131,7 +125,7 @@ public class AggregationHandler {
      */
     private void createOrUpdateAggForParams(LongList paramIds) throws Exception{
         AggregationStub aggStub =
-                adapter.getSupervisorSMA().getMCServices().getAggregationService().getAggregationStub();
+            AppMCAdapter.getInstance().getSupervisorSMA().getMCServices().getAggregationService().getAggregationStub();
       
         Identifier aggIdentifier = new Identifier(this.aggIdStr);
 
@@ -192,22 +186,25 @@ public class AggregationHandler {
         }
     }
 
-    /**
-     * Stops the subscription to the OBSW parameters values by disabling the generation of the
-     * aggregation we created in the aggregation service of the supervisor.
-     */
-    private void disableSupervisorParametersSubscription() throws Exception{
-        // get aggregation stub
-        AggregationStub aggStub = 
-                adapter.getSupervisorSMA().getMCServices().getAggregationService().getAggregationStub();
 
-        // disable generation of aggregation
-        InstanceBooleanPairList instBoolPairList = new InstanceBooleanPairList();
-        instBoolPairList.add(new InstanceBooleanPair(this.aggId, false));
-        aggStub.enableGeneration(false, instBoolPairList);
+    public LongList getParamIds() throws Exception{
+        ParameterStub paramStub =
+            AppMCAdapter.getInstance().getSupervisorSMA().getMCServices().getParameterService().getParameterStub();
+    
+        // list parameters to fetch and get their IDs from the supervisor
+        IdentifierList paramIdentifierList = new IdentifierList();
+        this.paramNames.stream().forEach(name -> paramIdentifierList.add(new Identifier(name)));
+        
+        // list parameter definition
+        ObjectInstancePairList objInstPairList;
+        objInstPairList = paramStub.listDefinition(paramIdentifierList);
+
+        // build list of param ids
+        LongList paramIds = new LongList();
+        objInstPairList.stream()
+            .forEach(objInstPair -> paramIds.add(objInstPair.getObjIdentityInstanceId()));
       
-        // log
-        LOGGER.log(Level.INFO, this.logPrefix + "Stopped fetching parameters from supervisor");
+        // return list of param ids
+        return paramIds;
     }
-
 }

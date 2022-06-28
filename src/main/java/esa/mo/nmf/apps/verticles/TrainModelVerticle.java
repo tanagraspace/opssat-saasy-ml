@@ -2,12 +2,12 @@ package esa.mo.nmf.apps.verticles;
 
 import io.vertx.core.AbstractVerticle;
 
-public class ModelTrainingVerticle extends AbstractVerticle {
+public class TrainModelVerticle extends AbstractVerticle {
   
   @Override
   public void start() throws Exception {
     vertx.eventBus().consumer("saasyml.training.classifier.bayesian.aode", msg -> {
-        // TODO: 
+        // todo: 
         // 1. execute the training for the given experimenter using the training data id to fetch data that previously stored. 
         // Training data was stored with a unique identifier for that training dataset when the DataPollingVerticle was previously executed.
         // HEre we enter ML pipeline for the given algorithm

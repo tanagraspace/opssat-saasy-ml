@@ -15,46 +15,37 @@ import esa.mo.nmf.apps.verticles.MainVerticle;
 public final class SaaSyMLApp {
     private static final Logger LOGGER = Logger.getLogger(SaaSyMLApp.class.getName());
     
-    // app Monitor and Control (M&C) Adapter
-    private AppMCAdapter adapter;
-    
-    private SaaSyMLApp() throws Exception{
-        
-        // initialize M&C interface
-        adapter = new AppMCAdapter();
+    private SaaSyMLApp() throws Exception {
+
+        LOGGER.log(Level.INFO, "Initializing the app.");
 
         // initialize application's NMF provider
         NanoSatMOConnectorImpl connector = new NanoSatMOConnectorImpl();
-        connector.init(adapter);
+        connector.init(AppMCAdapter.getInstance());
 
         // initialize application's NMF consumer (consuming the supervisor)
         SpaceMOApdapterImpl supervisorSMA =
             SpaceMOApdapterImpl.forNMFSupervisor(connector.readCentralDirectoryServiceURI());
 
         // once all initialized, pass them to the M&C interface that handles the application's logic
-        adapter.setConnector(connector);
-        adapter.setSupervisorSMA(supervisorSMA);
+        AppMCAdapter.getInstance().setConnector(connector);
+        AppMCAdapter.getInstance().setSupervisorSMA(supervisorSMA);
         
-        adapter.getSupervisorSMA().addDataReceivedListener(new AggregationWriter());
-
-        LOGGER.log(Level.INFO, "Initialized the app.");
+        // register data received listener
+        AppMCAdapter.getInstance().getSupervisorSMA().addDataReceivedListener(new AggregationWriter());
     }
+   
     
     /**
      * Starts the application.
      */
-    public void start() throws Exception{
+    public void start() throws Exception {
         // logging
         LOGGER.log(Level.INFO, "Starting the app.");
-        
-        // start fetching parameters
-        // TODO: make this a vertical?
-        //adapter.startFetchingParameters();
 
         LOGGER.log(Level.INFO, "Starting the Main Vertical.");
         MainVerticle mv = new MainVerticle();
         mv.start();
-        
     }
 
     
