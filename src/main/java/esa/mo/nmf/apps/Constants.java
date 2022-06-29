@@ -7,5 +7,4 @@ public final class Constants {
 
     // experiment id
     public static final int EXPERIMENT_ID = 213;
-    
 }

@@ -73,7 +73,7 @@ public class AggregationHandler {
      * @param subscribe True if we want supervisor to push new parameters data, false to stop the push
      * @return null if it was successful. If not null, then the returned value holds the error number
      */
-    public synchronized void toggleSupervisorParametersSubscription(boolean subscribe) throws Exception{    
+    public synchronized void enableSupervisorParametersSubscription(boolean subscribe) throws Exception{    
         if (subscribe) {
             enableSupervisorParameterSubscription();
         } else {

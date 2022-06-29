@@ -39,6 +39,9 @@ public class AggregationWriter implements CompleteAggregationReceivedListener {
 
             // get dataset id
             int datasetId = Utils.getDatasetIdFromAggId(aggId);
+
+            // keep track of data received count
+            ApplicationManager.getInstance().incrementReceivedDataCounter(expId, datasetId);
         
             // get aggregation timestamp and parameter values
             Long timestamp = aggregationInstance.getTimestamp().getValue();

@@ -6,13 +6,16 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 public class MainVerticle extends AbstractVerticle {
   private static final Logger LOGGER = Logger.getLogger(MainVerticle.class.getName());
@@ -31,7 +34,7 @@ public class MainVerticle extends AbstractVerticle {
 
     // todo: fetch from config file
     // set instance count
-    int instanceCount = 1;
+    int instanceCount = 5;
 
     // todo: make this configurable from a config file.
     // deployment options for multi-core and multi-threded goodness

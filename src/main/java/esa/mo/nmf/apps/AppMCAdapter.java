@@ -12,7 +12,8 @@ public class AppMCAdapter extends MonitorAndControlNMFAdapter{
     private static final Logger LOGGER = Logger.getLogger(AppMCAdapter.class.getName());
 
     // static variable reference of singleton type AppMCAdapter
-    private static AppMCAdapter singleton = null;
+    private static volatile AppMCAdapter instance;
+    private static Object mutex = new Object();
 
     // private constructor to force singleton instance only
     private AppMCAdapter(){}
@@ -20,17 +21,23 @@ public class AppMCAdapter extends MonitorAndControlNMFAdapter{
     // static method to create instance of Singleton class
     public static AppMCAdapter getInstance()
     {
-        // todo
         // the local variable result seems unnecessary but it's there to improve performance
         // in cases where the instance is already initialized (most of the time), the volatile field is only accessed once (due to "return result;" instead of "return instance;").
         // this can improve the method’s overall performance by as much as 25 percent.
         // source: https://www.journaldev.com/171/thread-safety-in-java-singleton-classes
-
-        if(singleton == null) {
-            singleton = new AppMCAdapter();
+        AppMCAdapter result = instance;
+        
+        // enforce Singleton design pattern
+        if (result == null) {
+            synchronized (mutex) {
+                result = instance;
+                if (result == null)
+                    instance = result = new AppMCAdapter();
+            }
         }
- 
-        return singleton;
+        
+        // return singleton instance
+        return result;
     }
 
     //----------------------------------- NMF components --------------------------------------------
