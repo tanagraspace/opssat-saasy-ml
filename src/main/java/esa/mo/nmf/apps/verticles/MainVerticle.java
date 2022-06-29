@@ -12,7 +12,6 @@ import io.vertx.core.json.JsonObject;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -68,15 +67,16 @@ public class MainVerticle extends AbstractVerticle {
       .handler(BodyHandler.create())
       .handler(this::unsubscribeFromTrainingDataFeed);
 
-    // route for model training
-    // todo: parametize the type "classifier" because not all algorithms are
-    // classifiers.
-    // router.get("/api/v1/training/:type/:group/:algorithm").handler(this::trainClassfifier);
+    // route to train model using given algorithm
+    router.post("/api/v1/training/:type/:group/:algorithm")
+      // todo: validate json payload against schema, see
+      // https://vertx.io/docs/vertx-web-validation/java/
+      .handler(BodyHandler.create())
+      .handler(this::trainModel);
 
-    router.get("/api/v1/training/classifier/:group/:algorithm").handler(this::trainClassfifier);
-
+    // todo
     // route: inference
-    router.get("/api/v1/inference").handler(this::inference);
+    // router.get("/api/v1/inference").handler(this::inference);
 
     // listen
     vertx.createHttpServer().requestHandler(router).listen(port);
@@ -91,12 +91,12 @@ public class MainVerticle extends AbstractVerticle {
     Map<String, String> responseMap = new HashMap<String, String>();
 
     // payload
-    JsonObject jsonObject = ctx.getBodyAsJson();
+    JsonObject payload = ctx.getBodyAsJson();
 
     try {
       // forward request to event bus to be handled in the Training Data Polling
       // Verticle
-      vertx.eventBus().request("saasyml.training.data.subscribe", jsonObject, reply -> {
+      vertx.eventBus().request("saasyml.training.data.subscribe", payload, reply -> {
 
         // return response from the verticle
         ctx.request().response().end((String) reply.result().body());
@@ -123,12 +123,12 @@ public class MainVerticle extends AbstractVerticle {
     Map<String, String> responseMap = new HashMap<String, String>();
 
     // payload
-    JsonObject jsonObject = ctx.getBodyAsJson();
+    JsonObject payload = ctx.getBodyAsJson();
 
     try {
       // forward request to event bus to be handled in the Training Data Polling
       // Verticle
-      vertx.eventBus().request("saasyml.training.data.unsubscribe", jsonObject, reply -> {
+      vertx.eventBus().request("saasyml.training.data.unsubscribe", payload, reply -> {
 
         // return response from the verticle
         ctx.request().response().end((String) reply.result().body());
@@ -150,10 +150,13 @@ public class MainVerticle extends AbstractVerticle {
    * train a model
    * @param ctx
    */
-  void trainClassfifier(RoutingContext ctx) {
+  void trainModel(RoutingContext ctx) {
 
     // response map
     Map<String, String> resMap = new HashMap<String, String>();
+
+    // payload
+    JsonObject payload = ctx.getBodyAsJson();
 
     // get api request url params
     // e.g. /api/v1/training/classifier/classifier.bayesian.aode
@@ -161,21 +164,13 @@ public class MainVerticle extends AbstractVerticle {
     // group is "bayesian"
     // algorithm is "aode"
 
-    // TODO: String type = ctx.pathParam(name: "type");
+    String type = ctx.pathParam("type");
     String group = ctx.pathParam("group");
     String algorithm = ctx.pathParam("algorithm");
 
-    // TODO: Request must be a POST request with a JSON payload message:
-    /**
-     * {
-     * expId: 123,
-     * traininDatasetId: 1,
-     * }
-     */
-
     // forward request to event bus
     try {
-      vertx.eventBus().request("saasyml.training.classifier." + group + "." + algorithm, "", reply -> {
+      vertx.eventBus().request("saasyml.training." + type + "." + group + "." + algorithm, payload, reply -> {
         ctx.request().response().end((String) reply.result().body());
       });
     } catch (Exception e) {
@@ -195,6 +190,7 @@ public class MainVerticle extends AbstractVerticle {
    * use a trained model to execute an inference
    * @param ctx
    */
+  /**
   void inference(RoutingContext ctx) {
     // response map
     Map<String, String> resMap = new HashMap<String, String>();
@@ -207,5 +203,6 @@ public class MainVerticle extends AbstractVerticle {
         .putHeader("content-type", "application/json; charset=utf-8")
         .end(Json.encodePrettily(resMap));
   }
+  */
 
 }

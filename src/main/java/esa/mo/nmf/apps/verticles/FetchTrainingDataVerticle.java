@@ -8,10 +8,12 @@ import java.util.ArrayList;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
+
 import esa.mo.nmf.apps.ApplicationManager;
 
 public class FetchTrainingDataVerticle extends AbstractVerticle {
   
+    // logger
     private static final Logger LOGGER = Logger.getLogger(FetchTrainingDataVerticle.class.getName());
 
     @Override

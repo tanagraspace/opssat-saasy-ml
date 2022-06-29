@@ -106,7 +106,7 @@ cd target/nmf-sdk-2.1.0-SNAPSHOT/home/nmf/consumer-test-tool
 #### 6. Make an API request
 
 ##### 6.1. Subscribe to a training data feed
-Use an API platform like [Postman] to make an POST request to the following endpoint:
+Use an API platform like [Postman](https://www.postman.com/) to make an POST request to the following endpoint:
 ```
 http://<SUPERVISOR_HOST>:9999/api/v1/training/data/subscribe
 ```
@@ -125,11 +125,23 @@ With the payload:
 Make several of these requests with different values for `expId`, `datasetId`, `interval`, and `params`. The fetched values will appear as log outputs in the CTT's console.
 
 ##### 6.2. Unsubscribe to a training data feed
-FIXME: This API request will only unscubscribe from the most recent trainind data feed, regardless of what is specified in the payload.
-
 Unsubscribe to the data feed with a POST request to the following endpoint:
 ```
 http://<SUPERVISOR_HOST>:9999/api/v1/training/data/unsubscribe
+```
+
+With the payload:
+```json
+{
+    "expId": 123,
+    "datasetId": 1,
+}
+```
+
+##### 6.3. Train a model
+Make an POST request to the following endpoint:
+```
+http://<SUPERVISOR_HOST>:9999/api/v1/training/:type/:group/:algorithm
 ```
 
 With the payload:
