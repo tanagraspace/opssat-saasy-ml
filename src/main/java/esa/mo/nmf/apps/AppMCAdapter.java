@@ -1,6 +1,6 @@
 package esa.mo.nmf.apps;
-import java.util.logging.Logger;
 
+import java.util.logging.Logger;
 import java.util.logging.Level;
 
 import esa.mo.nmf.CloseAppListener;
@@ -9,24 +9,35 @@ import esa.mo.nmf.nanosatmoconnector.NanoSatMOConnectorImpl;
 import esa.mo.nmf.spacemoadapter.SpaceMOApdapterImpl;
 
 public class AppMCAdapter extends MonitorAndControlNMFAdapter{
-    private static final Logger LOGGER = Logger.getLogger(MonitorAndControlNMFAdapter.class.getName());
-    
-    private ParameterSubscriptionHandler parameterSubscriptionHandler;
-    
-    public AppMCAdapter() {
-        this.parameterSubscriptionHandler = new ParameterSubscriptionHandler(this);
-    }
-    
-    public ParameterSubscriptionHandler getParameterSubscriptionHandler() {
-        return parameterSubscriptionHandler;
-    }
-    
-    public void startFetchingParameters() throws Exception{
-        parameterSubscriptionHandler.startParameterSubscriptionThreads();
-    }
+    private static final Logger LOGGER = Logger.getLogger(AppMCAdapter.class.getName());
 
-    public void stopFetchingParameters() throws Exception{
-        parameterSubscriptionHandler.stopParameterSubscriptionThreads();
+    // static variable reference of singleton type AppMCAdapter
+    private static volatile AppMCAdapter instance;
+    private static Object mutex = new Object();
+
+    // private constructor to force singleton instance only
+    private AppMCAdapter(){}
+
+    // static method to create instance of Singleton class
+    public static AppMCAdapter getInstance()
+    {
+        // the local variable result seems unnecessary but it's there to improve performance
+        // in cases where the instance is already initialized (most of the time), the volatile field is only accessed once (due to "return result;" instead of "return instance;").
+        // this can improve the method’s overall performance by as much as 25 percent.
+        // source: https://www.journaldev.com/171/thread-safety-in-java-singleton-classes
+        AppMCAdapter result = instance;
+        
+        // enforce Singleton design pattern
+        if (result == null) {
+            synchronized (mutex) {
+                result = instance;
+                if (result == null)
+                    instance = result = new AppMCAdapter();
+            }
+        }
+        
+        // return singleton instance
+        return result;
     }
 
     //----------------------------------- NMF components --------------------------------------------
@@ -78,7 +89,7 @@ public class AppMCAdapter extends MonitorAndControlNMFAdapter{
         try {
         
             // signal the parameter subscription thread to exit their loops
-            parameterSubscriptionHandler.stopParameterSubscriptionThreads();
+            //parameterSubscriptionHandler.stopParameterSubscriptionThreads();
             
             // close supervisor consumer connections
             supervisorSMA.closeConnections();

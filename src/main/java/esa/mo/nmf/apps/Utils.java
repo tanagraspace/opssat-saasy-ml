@@ -1,20 +1,26 @@
 package esa.mo.nmf.apps;
 
 public final class Utils {
-    public static String generateAggregationId(int threadId) {
-        return "Exp" + Constants.EXPERIMENT_ID + "_Agg_" + threadId;
+
+    public static String generateAggregationId(int expId, int datasetId) {
+        return "E" + expId + "_D" + datasetId;
     }
     
-    public static String generateAggregationDescription(int threadId) {
-        return "Exp" + Constants.EXPERIMENT_ID  + " Aggregation #" + threadId;
+    public static String generateAggregationDescription(int expId, int datasetId) {
+        return "Experiment " + expId  + ", Dataset #" + datasetId;
+    }
+
+    public static String generateLogPrefix(int expId, int datasetId) {
+        return "[" + generateAggregationId(expId, datasetId) + "]";
     }
     
-    public static int getThreadIdFromAggId(String aggId) {
-        // Egg AggId: "Exp888_AggThread_1"
-        return Integer.parseInt(aggId.substring(aggId.lastIndexOf('_')+1, aggId.length()));
+    public static int getExpIdFromAggId(String aggId) {
+        // e.g AggId: "E888_D1"
+        return Integer.parseInt(aggId.substring(1, aggId.lastIndexOf('_')));
     }
-    
-    public static String generateLogPrefix(int threadId) {
-        return "[Thread #" + threadId + "] ";
+
+    public static int getDatasetIdFromAggId(String aggId) {
+        // e.g AggId: "E888_D1"
+        return Integer.parseInt(aggId.substring(aggId.lastIndexOf('_')+2, aggId.length()));
     }
 }

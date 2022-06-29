@@ -1,29 +1,26 @@
 package esa.mo.nmf.apps;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javafx.util.Pair;
 
 public class ApplicationManager {
 
     private static volatile ApplicationManager instance;
     private static Object mutex = new Object();
     
-    // flag indicating if all threads should be stopped
-    private boolean dataPollingThreadsKeepAlive;
-    
-    // parameter names to fetch for each aggregation
-    private Map<String, List<String>> paramNamesMap;
-    
-    // track if we are finished fetching data or not for each aggregation
-    private Map<String, Boolean> dataFetchingCompleteMap;
+    // map that contains all instances of aggregation handlers
+    private Map<Pair<Integer, Integer>, AggregationHandler> aggregationHandlerMap;
+
+    // map that counts how many times data was pulled
+    private Map<Pair<Integer, Integer>, Integer> receivedDataCounterMap;
 
     // hide the constructor
     private ApplicationManager() {
-        this.dataPollingThreadsKeepAlive = true;
-        this.paramNamesMap =  new HashMap<String, List<String>>();
-        this.dataFetchingCompleteMap = new ConcurrentHashMap<String, Boolean>();
+        this.aggregationHandlerMap = new ConcurrentHashMap<Pair<Integer, Integer>, AggregationHandler>();
+        this.receivedDataCounterMap = new ConcurrentHashMap<Pair<Integer, Integer>, Integer>();
     }
 
     public static ApplicationManager getInstance() {
@@ -45,43 +42,72 @@ public class ApplicationManager {
         // return singleton instance
         return result;
     }
-    
-    public void setDataPollingThreadsKeepAlive(boolean alive) {
-        this.dataPollingThreadsKeepAlive = alive;
+
+    public int incrementReceivedDataCounter(int expId, int datasetId) {
+        Pair<Integer, Integer> id = new Pair<Integer, Integer>(expId, datasetId);
+
+        if(!this.receivedDataCounterMap.containsKey(id)){
+            this.receivedDataCounterMap.put(id, 1);
+        }else{
+            this.receivedDataCounterMap.put(
+                id, (this.receivedDataCounterMap.get(id)+1)
+            );
+        }
+
+        return this.receivedDataCounterMap.get(id);
     }
-    
-    public boolean isDataPollingThreadsKeepAlive() {
-        return this.dataPollingThreadsKeepAlive;
+
+    public int getReceivedDataCounter(int expId, int datasetId) {
+        Pair<Integer, Integer> id = new Pair<Integer, Integer>(expId, datasetId);
+
+        if(this.receivedDataCounterMap.containsKey(id)){
+            return this.receivedDataCounterMap.get(id);
+        }
+
+        return -1;
     }
-    
-    public void setParamNames(int threadId, List<String> paramNames){
-        String threadIdStr = Integer.toString(threadId);
-        this.paramNamesMap.put(threadIdStr, paramNames);
+
+    public void removeReceivedDataCounter(int expId, int datasetId) {
+        this.receivedDataCounterMap.remove(new Pair<Integer, Integer>(expId, datasetId));
     }
-    
-    public List<String> getParamNames(int threadId){
-        String threadIdStr = Integer.toString(threadId);
-        
-        if(paramNamesMap.containsKey(threadIdStr)) {
-            return paramNamesMap.get(threadIdStr);
-        }else {
-            return null;
+
+    public void addAggregationHandler(int expId, int datasetId, AggregationHandler aggregationHandler) {
+        this.aggregationHandlerMap.put(new Pair<Integer, Integer>(expId, datasetId), aggregationHandler);
+    }
+
+    public void removeAggregationHandler(int expId, int datasetId) {
+        aggregationHandlerMap.remove(new Pair<Integer, Integer>(expId, datasetId));
+    }
+
+    public AggregationHandler getAggregationHandler(int expId, int datasetId) {
+        return this.aggregationHandlerMap.get(new Pair<Integer, Integer>(expId, datasetId));
+    }
+
+
+    public void enableSupervisorParametersSubscription(int expId, int datasetId, boolean enable) throws Exception {
+        Pair<Integer, Integer> id = new Pair<Integer, Integer>(expId, datasetId);
+        if(this.aggregationHandlerMap.containsKey(id)){
+            this.aggregationHandlerMap.get(id).enableSupervisorParametersSubscription(enable);
         }
     }
-    
-    public void setDataFetchingComplete(int threadId, boolean complete){
-        String threadIdStr = Integer.toString(threadId);
-        this.dataFetchingCompleteMap.put(threadIdStr, complete);
-    }
-    
-    public boolean isDataFetchingComplete(int threadId) {
-        String threadIdStr = Integer.toString(threadId);
-        
-        if(dataFetchingCompleteMap.containsKey(threadIdStr)) {
-            return dataFetchingCompleteMap.get(threadIdStr);
-        }else {
-            // If key is not present then data fetching has not started
-            return false;
+
+    public AggregationHandler createAggregationHandler(int expId, int datasetId, double interval, List<String> paramNameList, boolean subscribeToFeed) throws Exception{
+        // the key to access the aggregation handler from the map
+        Pair<Integer, Integer> id = new Pair<Integer, Integer>(expId, datasetId);
+
+        // create aggregation handler if it doesn't already exist
+        if(!this.aggregationHandlerMap.containsKey(id)){
+            
+            AggregationHandler aggregationHandler = new AggregationHandler(expId, datasetId, interval, paramNameList);
+
+            // subscribe or unsubscribe to the parameter feed
+            aggregationHandler.enableSupervisorParametersSubscription(subscribeToFeed);
+            
+            // put aggregation handler in map
+            this.aggregationHandlerMap.put(id, aggregationHandler);
         }
+
+        // return the aggregation handler
+        return this.aggregationHandlerMap.get(id);
     }
-}
+}    
