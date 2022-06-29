@@ -18,6 +18,7 @@ public class PropertiesManager {
     
     // singleton instance
     private static PropertiesManager instance;
+    private static Object mutex = new Object();
     
     /**
      * Hide constructor.
@@ -34,10 +35,23 @@ public class PropertiesManager {
      * @return the PropertiesManager instance.
      */
     public static PropertiesManager getInstance() {
-        if (instance == null) {
-            instance = new PropertiesManager();
+        // the local variable result seems unnecessary but it's there to improve performance
+        // in cases where the instance is already initialized (most of the time), the volatile field is only accessed once (due to "return result;" instead of "return instance;").
+        // this can improve the method’s overall performance by as much as 25 percent.
+        // source: https://www.journaldev.com/171/thread-safety-in-java-singleton-classes
+        PropertiesManager result = instance;
+        
+        // enforce Singleton design pattern
+        if (result == null) {
+            synchronized (mutex) {
+                result = instance;
+                if (result == null)
+                    instance = result = new PropertiesManager();
+            }
         }
-        return instance;
+        
+        // return singleton instance
+        return result;
     }
     
     /**
@@ -68,5 +82,13 @@ public class PropertiesManager {
             String.format("Couldn't find property with key %s, returning null", key));
         }
         return property;
+    }
+
+    public int getPort(){
+        return Integer.parseInt(getProperty("port"));
+    }
+
+    public int getVerticalInstanceCount(String verticalClassName){
+        return Integer.parseInt(getProperty("vertical.instance.count." + verticalClassName));
     }
 }

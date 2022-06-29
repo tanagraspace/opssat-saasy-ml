@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import esa.mo.nmf.apps.PropertiesManager;
+
 
 public class MainVerticle extends AbstractVerticle {
   private static final Logger LOGGER = Logger.getLogger(MainVerticle.class.getName());
@@ -30,11 +32,7 @@ public class MainVerticle extends AbstractVerticle {
 
     // todo: fetch from config file
     // set instance count
-    int port = 9999;
-
-    // todo: fetch from config file
-    // set instance count
-    int instanceCount = 5;
+    int port = PropertiesManager.getInstance().getPort();
 
     // todo: make this configurable from a config file.
     // deployment options for multi-core and multi-threded goodness
@@ -42,11 +40,11 @@ public class MainVerticle extends AbstractVerticle {
     // this is useful for scaling easily across multiple cores
     DeploymentOptions fetchTrainingDataDeployOpts = new DeploymentOptions()
         .setWorker(true)
-        .setInstances(instanceCount);
+        .setInstances(PropertiesManager.getInstance().getVerticalInstanceCount(FetchTrainingDataVerticle.class.getSimpleName()));
 
     DeploymentOptions trainModelDeployOpts = new DeploymentOptions()
         .setWorker(true)
-        .setInstances(instanceCount);
+        .setInstances(PropertiesManager.getInstance().getVerticalInstanceCount(TrainModelVerticle.class.getSimpleName()));
 
     // deplopy the verticles
     LOGGER.log(Level.INFO, "Deploying Verticles.");

@@ -8,8 +8,7 @@ public class TrainModelVerticle extends AbstractVerticle {
   public void start() throws Exception {
     vertx.eventBus().consumer("saasyml.training.classifier.bayesian.aode", msg -> {
         // todo: 
-        // 1. execute the training for the given experimenter using the training data id to fetch data that previously stored. 
-        // Training data was stored with a unique identifier for that training dataset when the DataPollingVerticle was previously executed.
+        // 1. execute the training for the given experimenter using the training data id to fetch data that was previously stored. 
         // HEre we enter ML pipeline for the given algorithm
         //
         // 2. Serialize and save the resulting model.
