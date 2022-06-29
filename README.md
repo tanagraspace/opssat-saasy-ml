@@ -134,7 +134,7 @@ With the payload:
 ```json
 {
     "expId": 123,
-    "datasetId": 1,
+    "datasetId": 1
 }
 ```
 
@@ -148,7 +148,7 @@ With the payload:
 ```json
 {
     "expId": 123,
-    "datasetId": 1,
+    "datasetId": 1
 }
 ```
 
